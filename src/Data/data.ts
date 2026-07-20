@@ -1,6 +1,4 @@
-import { ServicePackage, CustomServiceItem, PortfolioItem, SuccessPartner, BusinessSolution, PackageCategory } from './types';
-
-export const packageCategories: PackageCategory[] = [
+export const packageCategories: any[] = [
   {
     id: 'cat1',
     name: 'الهوية البصرية',
@@ -109,11 +107,11 @@ export const businessSolutions: any[] = [
   }
 ];
 
-export const customServices: CustomServiceItem[] = [
+export const customServices: any[] = [
   { id: 's1', name: 'تصميم شعار', category: 'design', price: 500, description: 'تصميم شعار احترافي يعبر عن هويتك.' }
 ];
 
-export const initialPortfolio: PortfolioItem[] = [
+export const initialPortfolio: any[] = [
   {
     id: '1',
     title: 'تغطية متاجر اديداس',
@@ -189,7 +187,7 @@ export const initialPortfolio: PortfolioItem[] = [
   }
 ];
 
-export const partners: SuccessPartner[] = [
+export const partners: any[] = [
   { id: '1', name: 'Adidas', logoUrl: 'https://res.cloudinary.com/dfwfh4xzb/image/upload/v1782897349/Adidas-Logo_ataryb.png', logoScale: 'scale-100', invert: true },
   { id: '2', name: 'Off The Road', logoUrl: 'https://res.cloudinary.com/dfwfh4xzb/image/upload/v1782942529/Screenshot_123_ksly59.png', logoScale: 'scale-100', invert: false },
   { id: '3', name: 'Rose cup cake', logoUrl: 'https://res.cloudinary.com/dfwfh4xzb/image/upload/v1782942529/images_2_fmlemb.png', logoScale: 'scale-135', invert: false },
