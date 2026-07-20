@@ -178,7 +178,7 @@ export default function App() {
       </main>
 
       <ChatWidget />
-      <Footer setActiveTab={(tab) => {
+      <Footer setActiveTab={(tab: string) => {
         setActiveTab(tab);
         window.scrollTo({ top: 0, behavior: 'smooth' });
       }} />
