@@ -5,8 +5,8 @@ import { listenToChat, sendMessage } from '../services/chatService';
 import { ref, getDatabase, onValue, remove } from 'firebase/database';
 
 export default function AdminDashboard() {
-  const [orders, setOrders] = useState([]);
-  const [services, setServices] = useState([]);
+  const [orders, setOrders] = useState<any[]>([]);
+  const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<'orders' | 'services' | 'chats'>('orders');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
