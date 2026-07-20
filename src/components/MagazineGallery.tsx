@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, X } from 'lucide-react'; 
 
 export default function MagazineGallery({ setActiveTab }: any) {
-  const [images, setImages] = useState([]);
+  const [images, setImages] = useState<any[]>([]);
   const [filter, setFilter] = useState('الكل');
   const [loading, setLoading] = useState(true);
   const [selectedImage, setSelectedImage] = useState<any>(null); // حالة لعرض الصورة البارزة (Lightbox)
@@ -47,7 +47,7 @@ export default function MagazineGallery({ setActiveTab }: any) {
       </div>
 
       <div className="flex flex-wrap justify-center gap-2 md:gap-3 mb-8 md:mb-12">
-        {categories.map((cat) => (
+        {categories.map((cat: any) => (
           <button key={cat} onClick={() => setFilter(cat)} className={`px-4 md:px-6 py-2 rounded-full text-xs font-bold transition-all border ${filter === cat ? 'bg-amber-500 text-black border-amber-500' : 'bg-transparent text-white border-white/10 hover:border-white/50'}`}>
             {cat}
           </button>

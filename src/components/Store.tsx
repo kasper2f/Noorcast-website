@@ -138,7 +138,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
     setIsModalOpen(true); 
   };
 
-  const sortedPackageCategories = [...packageCategories].sort((a, b) => {
+  const sortedPackageCategories = [...packageCategories].sort((a: any, b: any) => {
     const order = ['إدارة المحتوى', 'المتاجر الإلكترونية', 'المواقع الإلكترونية', 'الهوية البصرية', 'التصوير الشهري'];
     return order.indexOf(a.name) - order.indexOf(b.name);
   });
@@ -167,7 +167,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
             <input placeholder="ابحث عن خدمة..." onChange={(e) => setSearchQuery(e.target.value)} value={searchQuery} className="w-full bg-[#121212] border border-white/10 rounded-xl p-3 pr-10 text-xs md:text-sm text-white outline-none focus:border-amber-500 transition-all" />
           </div>
           <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
-            {categories.map(cat => (
+            {categories.map((cat: any) => (
               <button key={cat} onClick={() => { setSelectedCategory(cat); setSearchQuery(''); }} className={`px-3.5 md:px-4 py-2.5 md:py-3 rounded-xl text-xs whitespace-nowrap border transition-all ${selectedCategory === cat ? 'bg-amber-500 text-black border-amber-500' : 'bg-[#121212] text-white border-white/5 hover:border-amber-500'}`}>{cat}</button>
             ))}
           </div>
@@ -220,7 +220,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
       ) : activeTab === 'packages' ? (
         <>
           <div className="flex justify-start md:justify-center gap-2 mb-8 md:mb-12 overflow-x-auto pb-2 scrollbar-none">
-            {sortedPackageCategories.map((cat) => (
+            {sortedPackageCategories.map((cat: any) => (
               <button key={cat.id} onClick={() => setActivePackageCat(cat.id)} className={`px-4 py-2 md:px-5 md:py-2 rounded-lg text-xs md:text-sm font-bold whitespace-nowrap transition-all ${activePackageCat === cat.id ? 'bg-white text-black' : 'bg-[#121212] text-white border border-white/10'}`}>
                 {cat.name}
               </button>
@@ -229,7 +229,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
           <div className="text-center mb-8 md:mb-10">
               <button 
                 onClick={() => {
-                  const currentCategory = sortedPackageCategories.find(c => c.id === activePackageCat);
+                  const currentCategory = sortedPackageCategories.find((c: any) => c.id === activePackageCat);
                   if (currentCategory && currentCategory.bundleKey) {
                     setActiveBundleType(currentCategory.bundleKey as keyof typeof BUNDLE_CATEGORIES);
                   }
@@ -240,12 +240,12 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
               </button>
           </div>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            {sortedPackageCategories.find(c => c.id === activePackageCat)?.packages.map((pkg) => (
+            {sortedPackageCategories.find((c: any) => c.id === activePackageCat)?.packages.map((pkg: any) => (
               <div key={pkg.id} className="bg-[#121212] p-5 md:p-8 rounded-3xl border border-white/5 flex flex-col hover:border-amber-500 transition-all">
                 <h3 className="text-base md:text-xl font-bold mb-2">{pkg.name}</h3>
                 <div className="text-lg md:text-2xl font-black text-amber-500 mb-4 md:mb-6">{pkg.price.toLocaleString()} ر.س</div>
                 <ul className="text-white/60 text-xs md:text-sm mb-6 md:mb-8 space-y-2 flex-grow">
-                  {pkg.features.map((f, i) => <li key={i} className="flex items-center gap-2"> <CheckCircle size={14} className="text-amber-500 shrink-0" /> {f}</li>)}
+                  {pkg.features.map((f: any, i: any) => <li key={i} className="flex items-center gap-2"> <CheckCircle size={14} className="text-amber-500 shrink-0" /> {f}</li>)}
                 </ul>
                 <button onClick={() => openBooking(pkg)} className="w-full bg-white text-black py-3 rounded-xl font-bold text-xs md:text-sm hover:bg-amber-500">حجز الباقة فوراً</button>
               </div>
@@ -407,7 +407,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
               {appliedCoupon && <p className="text-[10px] text-green-500">تم تطبيق خصم {Number(appliedCoupon.DiscountPercentage) * 100}% بنجاح</p>}
             </div>
 
-            <div className="text-lg font-black text-white mb-6 border-t border-white/5 pt-4 flex justify-between items-center">
+            <div className="text-lg font-weight-bold text-white mb-6 border-t border-white/5 pt-4 flex justify-between items-center">
               <span>المجموع الكلي:</span>
               <span className="text-amber-500">{finalTotal} ر.س</span>
             </div>

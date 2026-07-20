@@ -126,6 +126,7 @@ export default function App() {
               
               {activeTab === 'portfolio' && (
                 <Portfolio 
+                  isAdmin={isAdmin}
                   onOrderSimilar={handleOrderSimilar} 
                   setSelectedProject={setSelectedProject} 
                   filterCategory={preselectedCategory} 
