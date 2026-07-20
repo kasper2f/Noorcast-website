@@ -1,0 +1,37 @@
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;500;600;700;800;900&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Cairo", sans-serif;
+  --animate-fadeIn: fadeIn 0.4s ease-out forwards;
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+html { 
+  scroll-behavior: smooth; 
+  width: 100%;
+}
+
+body {
+  @apply bg-[#0A0A0B] text-[#F8FAFC] antialiased;
+  width: 100%;
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+*, *:before, *:after {
+  box-sizing: inherit;
+}
+
+/* ضبط العناصر المرنة والصور لعدم الخروج عن إطار شاشة الجوال */
+img, video {
+  max-width: 100%;
+  height: auto;
+}
+
+/* ضبط العناوين لتكون أنيقة ومتباعدة كما في الريفرنس */
+h1 { @apply text-4xl md:text-5xl font-black leading-tight tracking-tight; }
+h2 { @apply text-2xl md:text-3xl font-black leading-tight tracking-tight; }
