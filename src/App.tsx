@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import Header from './components/Header';
 import Hero from './components/Hero';
 import WhyUs from './components/WhyUs';
+import Workflow from './components/Workflow';
 import Portfolio from './components/Portfolio';
 import PortfolioPreview from './components/PortfolioPreview';
 import Store from './components/Store';
@@ -31,6 +32,7 @@ export default function App() {
         setPendingServiceId(id);
         setActiveTab('store');
         window.history.replaceState(null, '', window.location.pathname);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
     };
     
@@ -49,6 +51,7 @@ export default function App() {
     setPreselectedCategory(project.subCategory || project.category);
     setActiveTab('store');
     setSelectedProject(null); 
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleMagazineOrder = (item: any) => {
@@ -60,18 +63,29 @@ export default function App() {
     const targetCategory = item.subCategory || item.category;
     setPreselectedCategory(targetCategory);
     setActiveTab('store');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleViewSimilarPortfolio = (category: string) => {
     setPreselectedCategory(category);
     setActiveTab('portfolio');
     setSelectedProject(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  // دالة التعامل مع الضغط على الخدمة في صفحة تفاصيل المشروع للانتقال المباشر لها في المتجر
+  const handleServiceClick = (serviceName: string) => {
+    setPendingServiceId(serviceName);
+    setActiveTab('store');
+    setSelectedProject(null);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleOrderSuccess = (orderId: string) => {
     setPreselectedCategory(undefined);
     setSourceProject(null); 
     setActiveTab('tracker');
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -86,6 +100,7 @@ export default function App() {
             setSourceProject(null);
             setPendingServiceId(null);
           }
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }} 
         isAdmin={isAdmin} 
         setIsAdmin={setIsAdmin} 
@@ -97,8 +112,12 @@ export default function App() {
             <motion.div key="details" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
               <ProjectDetailsPage 
                 project={selectedProject} 
-                onBack={() => setSelectedProject(null)} 
+                onBack={() => {
+                  setSelectedProject(null);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }} 
                 onOrderSimilar={handleOrderSimilar}
+                onServiceClick={handleServiceClick}
               />
             </motion.div>
           ) : (
@@ -113,6 +132,10 @@ export default function App() {
                 <div className="space-y-0 pb-16">
                   <Hero setActiveTab={setActiveTab} />
                   <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}><WhyUs /></motion.div>
+                  
+                  {/* إضافة قسم خطوات العمل هنا بشكل أنيق ومتناسق */}
+                  <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}><Workflow /></motion.div>
+
                   <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }}>
                     <PortfolioPreview 
                         onOrderSimilar={handleOrderSimilar} 
@@ -155,7 +178,10 @@ export default function App() {
       </main>
 
       <ChatWidget />
-      <Footer setActiveTab={setActiveTab} />
+      <Footer setActiveTab={(tab) => {
+        setActiveTab(tab);
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }} />
     </div>
   );
 }

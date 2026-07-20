@@ -1,8 +1,20 @@
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import { motion, useMotionValue, useTransform, animate } from 'framer-motion';
 import VideoPlayer from './VideoPlayer'; 
 import { heroVideos } from '../Data/data'; 
-import * as LucideIcons from 'lucide-react'; 
+
+// مكون فرعي للأرقام التصاعدية المتحركة
+function AnimatedCounter({ value, suffix = '' }: { value: number; suffix?: string }) {
+  const count = useMotionValue(0);
+  const rounded = useTransform(count, (latest) => Math.floor(latest) + suffix);
+
+  useEffect(() => {
+    const controls = animate(count, value, { duration: 2.5, ease: 'easeOut' });
+    return controls.stop;
+  }, [count, value]);
+
+  return <motion.span>{rounded}</motion.span>;
+}
 
 export default function Hero({ setActiveTab }: any) {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
@@ -18,7 +30,7 @@ export default function Hero({ setActiveTab }: any) {
     <section className="bg-[#0A0A0B] py-10 md:py-16 px-4 md:px-6 overflow-hidden">
       <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
         
-        {/* البطاقة النصية */}
+        {/* البطاقة النصية (اليمين) */}
         <motion.div 
           initial={{ opacity: 0, x: -30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -27,28 +39,28 @@ export default function Hero({ setActiveTab }: any) {
         >
           <div>
             <span className="text-amber-500 font-bold tracking-[0.2em] text-[9px] md:text-[10px] uppercase mb-3 md:mb-4 block">#نصنع_المستقبل_البصري</span>
-            <h1 className="text-2xl sm:text-3xl md:text-4xl font-black leading-tight mb-4 md:mb-6 text-white">
-              نحول أفكارك إلى <br /> <span className="text-amber-500">واقع بصري مذهل</span>
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-black leading-tight mb-3 text-white">
             </h1>
-            <p className="text-white/60 text-xs sm:text-sm leading-relaxed max-w-sm mb-6 md:mb-8">
-               نوركاست تجمع بين الإنتاج السينمائي الاحترافي، والتخطيط التسويقي الذكي، لرفع جودة محتواك ومضاعفة أرقامك.
+            <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-2 leading-snug">
+              <span className="text-white">من الفكرة إلى التنفيذ...</span> <span className="text-amber-500">اطلب خدماتك الإبداعية بسهولة ووضوح</span>
+            </h2>
+            <p className="text-white/40 text-xs sm:text-sm leading-relaxed mb-6 md:mb-8 font-medium">
+              لماذا يثقون العملاء في نوركاست
             </p>
             
-            <div className="grid grid-cols-2 gap-2.5 md:gap-3 mb-6 md:mb-8">
+            {/* المربعات الأربعة الجديدة المنظمة */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-6 md:mb-8">
               {[
-                { name: 'إنتاج سينمائي', icon: 'Video' },
-                { name: 'تخطيط تسويقي', icon: 'Target' },
-                { name: 'موشن جرافيك', icon: 'Monitor' },
-                { name: 'إدارة محتوى', icon: 'Share2' }
-              ].map((item, i) => {
-                const Icon = (LucideIcons as any)[item.icon]; 
-                return (
-                  <div key={i} className="flex items-center gap-2 text-[11px] font-bold text-white/70 bg-black/50 p-2 md:p-2.5 rounded-lg border border-white/5 hover:border-amber-500/50 hover:bg-amber-500/10 transition-all duration-300">
-                    <span className="text-amber-500 shrink-0">{Icon && <Icon size={16} />}</span> 
-                    <span className="truncate">{item.name}</span>
-                  </div>
-                );
-              })}
+                { title: '🟡 أسعار معلنة', desc: 'اعرف تكلفة مشروعك قبل إرسال الطلب.' },
+                { title: '🟡 خصص خدمتك', desc: 'اختر الإضافات التي تناسب احتياجك فقط.' },
+                { title: '🟡 اطلب مباشرة', desc: 'لا حاجة لانتظار عرض سعر.' },
+                { title: '🟡 شاهد الأعمال أولاً', desc: 'شاهد الجودة قبل اتخاذ قرار الشراء.' }
+              ].map((box, i) => (
+                <div key={i} className="bg-black/40 p-3.5 rounded-2xl border border-white/5 hover:border-amber-500/40 transition-all duration-300 flex flex-col justify-center">
+                  <span className="text-xs sm:text-sm font-bold text-white mb-1 block">{box.title}</span>
+                  <span className="text-[11px] sm:text-xs text-white/60 leading-relaxed">{box.desc}</span>
+                </div>
+              ))}
             </div>
           </div>
 
@@ -58,7 +70,7 @@ export default function Hero({ setActiveTab }: any) {
           </div>
         </motion.div>
 
-        {/* بطاقة الفيديو */}
+        {/* بطاقة الفيديو (اليسار) */}
         <motion.div 
           initial={{ opacity: 0, x: 30 }}
           animate={{ opacity: 1, x: 0 }}
@@ -81,9 +93,31 @@ export default function Hero({ setActiveTab }: any) {
             </motion.div>
           </div>
           
-          <div className="flex justify-center items-center py-1 md:py-2">
-            <div className="text-amber-500 text-[12px] md:text-[15px] font-black uppercase tracking-[0.3em] opacity-100 border-t border-white/5 pt-6 md:pt-10 w-full text-center">
-              أحدث أعمالنا
+          {/* قسم الإحصائيات التفاعلية المتحركة تحت الفيديو */}
+          <div className="grid grid-cols-4 gap-2 pt-4 border-t border-white/5 text-center">
+            <div className="bg-black/40 p-2 rounded-xl border border-white/5">
+              <div className="text-amber-500 font-black text-sm md:text-base">
+                +<AnimatedCounter value={200} />
+              </div>
+              <div className="text-white/40 text-[9px] md:text-[10px] mt-0.5">مشروع</div>
+            </div>
+            <div className="bg-black/40 p-2 rounded-xl border border-white/5">
+              <div className="text-amber-500 font-black text-sm md:text-base">
+                +<AnimatedCounter value={50} />
+              </div>
+              <div className="text-white/40 text-[9px] md:text-[10px] mt-0.5">عميل</div>
+            </div>
+            <div className="bg-black/40 p-2 rounded-xl border border-white/5">
+              <div className="text-amber-500 font-black text-sm md:text-base">
+                +<AnimatedCounter value={10} />
+              </div>
+              <div className="text-white/40 text-[9px] md:text-[10px] mt-0.5">سنوات خبرة</div>
+            </div>
+            <div className="bg-black/40 p-2 rounded-xl border border-white/5">
+              <div className="text-amber-500 font-black text-sm md:text-base">
+                <AnimatedCounter value={98} suffix="%" />
+              </div>
+              <div className="text-white/40 text-[9px] md:text-[10px] mt-0.5">رضا العملاء</div>
             </div>
           </div>
         </motion.div>

@@ -49,20 +49,34 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
     loadServices();
   }, []);
 
+  // تحديث آلية البحث والوصول للخدمة المستهدفة بالاسم الدقيق المطابق تماماً
   useEffect(() => {
-    if (targetServiceId && !isLoading) {
+    if (targetServiceId && !isLoading && ourServices.length > 0) {
       setActiveTab('services');
-      const element = document.getElementById(`service-${targetServiceId}`);
-      if (element) {
-        setTimeout(() => {
-          element.scrollIntoView({ behavior: 'smooth' });
-          element.classList.add('ring-2', 'ring-amber-500');
-          setTimeout(() => element.classList.remove('ring-2', 'ring-amber-500'), 2000);
-          if (onClearTarget) onClearTarget();
-        }, 800);
+      setSearchQuery(''); // مسح أي بحث قديم لضمان ظهور الخدمة المستهدفة
+      setSelectedCategory('الكل');
+
+      // البحث عن الخدمة بالاسم المطابق تماماً (أو احتواء الاسم بالكامل)
+      const targetService = ourServices.find((s: any) => 
+        s.title.trim().toLowerCase() === targetServiceId.trim().toLowerCase() ||
+        s.title.trim().toLowerCase().includes(targetServiceId.trim().toLowerCase())
+      );
+
+      if (targetService) {
+        const element = document.getElementById(`service-${targetService.id}`);
+        if (element) {
+          setTimeout(() => {
+            element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            element.classList.add('ring-4', 'ring-amber-500', 'scale-[1.02]');
+            setTimeout(() => {
+              element.classList.remove('ring-4', 'ring-amber-500', 'scale-[1.02]');
+            }, 3000);
+            if (onClearTarget) onClearTarget();
+          }, 800);
+        }
       }
     }
-  }, [targetServiceId, isLoading, onClearTarget]);
+  }, [targetServiceId, isLoading, ourServices, onClearTarget]);
 
   const handleApplyCoupon = () => {
     const found = coupons.find(c => String(c.Code).trim() === couponCode.trim() && String(c.Active).trim().toUpperCase() === 'TRUE');
@@ -82,7 +96,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
     return ourServices.filter(s => {
       const searchLower = searchQuery.toLowerCase();
       const matchesSearch = s.title.toLowerCase().includes(searchLower) || 
-                            (s.description && s.description.toLowerCase().includes(searchLower));
+                          (s.description && s.description.toLowerCase().includes(searchLower));
       
       if (searchQuery.length > 0) return matchesSearch;
       const cleanSource = selectedCategory.trim().toLowerCase();
@@ -256,32 +270,32 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
         <div className="flex justify-center items-center py-20 text-white/50"><RefreshCw className="animate-spin mr-2" size={24} /> جاري تحميل الخدمات...</div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-12 items-start relative">
-          {/* الخدمات تعرض في عمودين على الجوال وثلاثة على اللابتوب */}
+          {/* تم الحفاظ على شبكة الكروت الأصلية تماماً (grid-cols-2 على الجوال و 2 في عمود الخدمات) مع تصحيح الخطوط وتكامل عرض العناصر الداخلية بالكامل */}
           <div className="md:col-span-2 grid grid-cols-2 gap-3 md:gap-6">
             {getFilteredServices().map((s: any) => (
-              <div id={`service-${s.id}`} key={s.id} className="bg-[#121212] p-3.5 sm:p-5 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 hover:border-amber-500 transition-all flex flex-col justify-between">
-                <div>
-                  <div className="flex flex-col sm:flex-row justify-between items-start gap-1 sm:gap-4 mb-2 md:mb-4">
-                    <h4 className="font-black text-xs sm:text-sm md:text-xl text-white leading-snug line-clamp-2">{s.title}</h4>
+              <div id={`service-${s.id}`} key={s.id} className="bg-[#121212] p-3.5 sm:p-5 md:p-8 rounded-2xl md:rounded-3xl border border-white/5 hover:border-amber-500 transition-all flex flex-col justify-between w-full">
+                <div className="w-full">
+                  <div className="flex flex-col sm:flex-row justify-between items-start gap-1 sm:gap-4 mb-2 md:mb-4 w-full">
+                    <h4 className="font-black text-xs sm:text-sm md:text-xl text-white leading-snug w-full">{s.title}</h4>
                     <span className="text-amber-500 font-black text-xs sm:text-base md:text-2xl whitespace-nowrap">{s.price} ر.س</span>
                   </div>
-                  {/* تم إزالة line-clamp لكي يظهر وصف الخدمة كاملاً وغير مبتور */}
-                  <p className="text-white/50 text-[10px] sm:text-xs md:text-sm mb-3 leading-relaxed">{s.description}</p>
-                  <div className="border-t border-white/10 my-2 md:my-3"></div>
+                  {/* وصف الخدمة */}
+                  <p className="text-white/50 text-[10px] sm:text-xs md:text-sm mb-3 leading-relaxed w-full">{s.description}</p>
+                  <div className="border-t border-white/10 my-2 md:my-3 w-full"></div>
                   {onOrderSimilar && (
-                    <button onClick={() => onOrderSimilar(s.category)} className="text-[9px] sm:text-[11px] text-amber-500 font-bold mb-3 hover:underline text-right block truncate w-full">أعمال مشابهة</button>
+                    <button onClick={() => onOrderSimilar(s.category)} className="text-[9px] sm:text-[11px] text-amber-500 font-bold mb-3 hover:underline text-right block truncate w-full">استعرض أعمال هذه الخدمة</button>
                   )}
-                  <div className="flex flex-wrap content-start gap-1.5 md:gap-2 mb-4 md:mb-8 flex-grow">
+                  <div className="flex flex-wrap content-start gap-1.5 md:gap-2 mb-4 md:mb-8 flex-grow w-full">
                     {(s.features || []).map((f: string, i: number) => (
                       <span key={i} className="bg-white/5 px-2 py-0.5 md:py-1 rounded text-[9px] md:text-[11px] text-white/70 flex items-center gap-1 w-fit"><CheckCircle size={10} className="text-amber-500 shrink-0" /> {f}</span>
                     ))}
                   </div>
                 </div>
 
-                <div className="mt-auto pt-3 md:pt-5 border-t border-white/5">
+                <div className="mt-auto pt-3 md:pt-5 border-t border-white/5 w-full">
                   {(s.addons || []).map((a: any) => (
-                    <div key={a.id} className="flex items-center justify-between w-full mb-2 gap-1">
-                        <span className={`text-[10px] sm:text-xs truncate ${s.count > 0 ? 'text-white/70' : 'text-white/25'}`}>{a.title}</span>
+                    <div key={a.id} className="flex items-center justify-between w-full mb-2 gap-1.5">
+                        <span className={`text-[10px] sm:text-xs flex-1 text-right truncate ${s.count > 0 ? 'text-white/70' : 'text-white/25'}`} title={a.title}>{a.title}</span>
                         <div className="flex items-center gap-1.5 shrink-0">
                             <button onClick={() => updateAddonCount(s.id, a.title, -1, s.count)} disabled={s.count === 0} className="text-white/50 hover:text-white disabled:opacity-20"><MinusCircle size={14}/></button>
                             <span className="text-[10px] sm:text-xs font-bold w-3 text-center">{selectedAddons[s.id]?.[a.title] || 0}</span>
@@ -289,7 +303,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
                         </div>
                     </div>
                   ))}
-                  <div className="flex items-center justify-between mt-3">
+                  <div className="flex items-center justify-between mt-3 w-full">
                     <button onClick={() => updateCount(s.id, -1)} className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-white/5 rounded-lg md:rounded-xl hover:bg-white/10 text-white text-xs md:text-base">-</button>
                     <span className="font-bold text-xs sm:text-sm md:text-lg w-6 text-center text-white">{s.count}</span>
                     <button onClick={() => updateCount(s.id, 1)} className="w-7 h-7 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-amber-500 text-black rounded-lg md:rounded-xl hover:bg-amber-400 text-xs md:text-base">+</button>
@@ -401,7 +415,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
 
             <div className="mb-4">
               <div className="flex gap-2 mb-2">
-                <input type="text" placeholder="كود الخصم" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} className="flex-grow bg-black border border-white/10 rounded-xl p-2.5 text-xs outline-none text-white" />
+                <input type="text" placeholder="كود الخصم" value={couponCode} onChange={(e) => setCouponCode(e.target.value)} className="flex-grow bg-black border border-white/10 rounded-lg p-2.5 text-xs outline-none text-white" />
                 <button onClick={handleApplyCoupon} className="bg-white/10 px-4 py-2.5 rounded-xl text-xs hover:bg-white/20 text-white"><Tag size={14} /></button>
               </div>
               {appliedCoupon && <p className="text-[10px] text-green-500">تم تطبيق خصم {Number(appliedCoupon.DiscountPercentage) * 100}% بنجاح</p>}
