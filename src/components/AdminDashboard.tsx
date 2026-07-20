@@ -26,9 +26,8 @@ export default function AdminDashboard() {
   const [activeChat, setActiveChat] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [replyText, setReplyText] = useState('');
-  const [showMobileChatList, setShowMobileChatList] = useState(true); // تبديل القائمة/المحادثة في الجوال
+  const [showMobileChatList, setShowMobileChatList] = useState(true);
 
-  // مرجع للنزول لآخر رسالة في المحادثة التلقائي
   const messagesEndRef = useRef<null | HTMLDivElement>(null);
 
   const filteredServicesForChat = useMemo(() => {
@@ -58,7 +57,6 @@ export default function AdminDashboard() {
     }
   }, [activeChat]);
 
-  // عمل Scroll تلقائي عند فتح الشات أو استلام رسالة جديدة
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages, activeChat]);
@@ -118,8 +116,8 @@ export default function AdminDashboard() {
     if (!newService.title || !newService.price) return alert('يرجى تعبئة العنوان والسعر');
     const formattedService = {
       ...newService,
-      features: newService.features.split(',').map(f => f.trim()),
-      addons: newService.addons ? newService.addons.split(';').filter((i: string) => i.includes(':')).map(item => ({
+      features: newService.features.split(',').map((f: string) => f.trim()),
+      addons: newService.addons ? newService.addons.split(';').filter((i: string) => i.includes(':')).map((item: string) => ({
           id: Date.now().toString() + Math.random(),
           title: item.split(':')[0].trim(),
           price: Number(item.split(':')[1] || 0)
@@ -192,13 +190,12 @@ export default function AdminDashboard() {
 
       {activeTab === 'chats' ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[75vh] md:h-[600px] mb-8 relative">
-          {/* قائمة المستخدمين (تظهر دائماً في اللابتوب وفي الجوال عند عدم اختيار محادثة) */}
           <div className={`bg-[#121212] rounded-2xl p-3 md:p-4 border border-white/5 overflow-y-auto ${!showMobileChatList && activeChat ? 'hidden md:block' : 'block'}`}>
             <h3 className="text-xs font-bold text-white/40 uppercase tracking-wider mb-3 px-2">المحادثات النشطة ({chatUsers.length})</h3>
             {chatUsers.length === 0 ? (
               <p className="text-xs text-white/30 text-center py-8">لا توجد محادثات نشطة حالياً</p>
             ) : (
-              chatUsers.map(user => (
+              chatUsers.map((user: string) => (
                 <div key={user} className={`p-3 rounded-xl mb-2 flex justify-between items-center transition-all ${activeChat === user ? 'bg-amber-500/20 border border-amber-500/30' : 'hover:bg-white/5'}`}>
                   <span className="cursor-pointer flex-1 text-xs md:text-sm font-bold truncate text-white" onClick={() => { setActiveChat(user); setShowMobileChatList(false); }}>{user}</span>
                   <button onClick={() => handleDeleteChat(user)} className="text-red-500 hover:text-red-400 p-1 shrink-0">
@@ -209,11 +206,9 @@ export default function AdminDashboard() {
             )}
           </div>
 
-          {/* نافذة المحادثة والرد */}
           <div className={`md:col-span-2 bg-[#121212] rounded-2xl flex flex-col border border-white/5 overflow-hidden ${showMobileChatList && !activeChat ? 'hidden md:flex' : 'flex'}`}>
             {activeChat ? (
               <>
-                {/* رأس الشات للجوال للعودة للقائمة */}
                 <div className="md:hidden bg-black/50 p-3 border-b border-white/10 flex items-center justify-between">
                   <button onClick={() => setShowMobileChatList(true)} className="text-xs text-amber-500 font-bold flex items-center gap-1">
                     ← العودة للقائمة
@@ -221,18 +216,15 @@ export default function AdminDashboard() {
                   <span className="text-xs text-white/70 font-mono truncate max-w-[200px]">{activeChat}</span>
                 </div>
 
-                {/* منطقة الرسائل قابلة للتمرير الداخلي (Scroll) */}
                 <div className="flex-1 p-3 md:p-4 overflow-y-auto space-y-2.5">
-                  {chatMessages.map((m, i) => (
+                  {chatMessages.map((m: any, i: number) => (
                     <div key={i} className={`p-3 rounded-xl max-w-[85%] md:max-w-[70%] w-fit text-xs md:text-sm leading-relaxed ${m.sender === 'admin' ? 'bg-amber-500 text-black ml-auto font-medium' : 'bg-white/10 text-white mr-auto'}`}>
                       {m.text}
                     </div>
                   ))}
-                  {/* نقطة النزول التلقائي للمحادثة */}
                   <div ref={messagesEndRef} />
                 </div>
 
-                {/* منطقة الإدخال ثابتة في الأسفل */}
                 <div className="p-3 md:p-4 border-t border-white/5 space-y-2 shrink-0 bg-[#121212]">
                   <div className="relative">
                     <input 
@@ -296,7 +288,6 @@ export default function AdminDashboard() {
 
           {activeTab === 'orders' ? (
             <div className="space-y-4 md:space-y-0">
-              {/* عرض جدول على اللابتوب وعرض كروت متجاوبة على الجوال */}
               <div className="hidden md:block bg-[#121212] rounded-3xl border border-white/5 overflow-hidden">
                 <table className="w-full text-right">
                   <thead className="bg-black/40 text-xs text-white/30 uppercase tracking-widest">
@@ -344,7 +335,6 @@ export default function AdminDashboard() {
                 </table>
               </div>
 
-              {/* تصميم الكروت الخاص بالجوال */}
               <div className="md:hidden space-y-4">
                 {getFilteredOrders().map((order: any) => (
                   <div key={order?.orderId} className="bg-[#121212] p-4 rounded-2xl border border-white/5 space-y-3">
