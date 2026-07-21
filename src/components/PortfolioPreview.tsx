@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ArrowLeft, ExternalLink, RefreshCw } from 'lucide-react';
+import { ArrowLeft, ExternalLink } from 'lucide-react';
 import VideoPlayer from './VideoPlayer';
+import Loader from './Loader';
 import { getPortfolio } from '../dbService';
 
 export default function PortfolioPreview({ onOrderSimilar, setActiveTab, setSelectedProject }: any) {
@@ -35,7 +36,7 @@ export default function PortfolioPreview({ onOrderSimilar, setActiveTab, setSele
         </div>
         
         {isLoading ? (
-            <div className="flex justify-center py-20 text-white/30"><RefreshCw className="animate-spin" size={24} /></div>
+            <Loader text="جاري تحميل أحدث الأعمال الفنية..." />
         ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-10">
               {projects.map((project) => (

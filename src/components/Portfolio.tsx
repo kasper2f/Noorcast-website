@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import VideoPlayer from './VideoPlayer'; 
+import Loader from './Loader';
 import { getPortfolio } from '../dbService'; 
-import { RefreshCw } from 'lucide-react';
 
 interface PortfolioProps {
   isAdmin: boolean;
@@ -45,11 +45,7 @@ export default function Portfolio({ isAdmin, onOrderSimilar, setSelectedProject,
   };
 
   if (isLoading) {
-    return (
-      <div className="flex justify-center items-center py-20 text-white/50 text-xs md:text-sm">
-        <RefreshCw className="animate-spin mr-2" size={20} /> جاري تحميل معرض الأعمال...
-      </div>
-    );
+    return <Loader text="جاري تحميل معرض الأعمال الإبداعي..." />;
   }
 
   return (

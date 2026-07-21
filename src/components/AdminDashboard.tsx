@@ -23,6 +23,7 @@ export default function AdminDashboard() {
   const [editingService, setEditingService] = useState<any>(null);
 
   const [chatUsers, setChatUsers] = useState<string[]>([]);
+  const [unreadChatsCount, setUnreadChatsCount] = useState(0); // عدد المحادثات غير المقروءة للتنبيه
   const [activeChat, setActiveChat] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [replyText, setReplyText] = useState('');
@@ -41,9 +42,26 @@ export default function AdminDashboard() {
       const chatsRef = ref(db, 'chats');
       return onValue(chatsRef, (snapshot) => {
         if (snapshot.exists()) {
-          setChatUsers(Object.keys(snapshot.val()));
+          const chatsData = snapshot.val();
+          const users = Object.keys(chatsData);
+          setChatUsers(users);
+
+          // حساب المحادثات التي آخر رسالة فيها من العميل (غير مقروءة من الـ admin)
+          let unreadCount = 0;
+          users.forEach(user => {
+            const userMessages = chatsData[user];
+            if (userMessages) {
+              const msgsArray = Object.values(userMessages) as any[];
+              const lastMsg = msgsArray[msgsArray.length - 1];
+              if (lastMsg && lastMsg.sender !== 'admin') {
+                unreadCount++;
+              }
+            }
+          });
+          setUnreadChatsCount(unreadCount);
         } else {
           setChatUsers([]);
+          setUnreadChatsCount(0);
         }
       });
     }
@@ -183,7 +201,19 @@ export default function AdminDashboard() {
         <div className="flex gap-2 sm:gap-4 overflow-x-auto w-full sm:w-auto pb-1 scrollbar-none">
           <button onClick={() => setActiveTab('orders')} className={`text-base md:text-xl font-black whitespace-nowrap transition-colors ${activeTab === 'orders' ? 'text-amber-500' : 'text-white/40 hover:text-white'}`}>إدارة الطلبات</button>
           <button onClick={() => setActiveTab('services')} className={`text-base md:text-xl font-black whitespace-nowrap transition-colors ${activeTab === 'services' ? 'text-amber-500' : 'text-white/40 hover:text-white'}`}>إدارة الخدمات</button>
-          <button onClick={() => setActiveTab('chats')} className={`text-base md:text-xl font-black whitespace-nowrap transition-colors ${activeTab === 'chats' ? 'text-amber-500' : 'text-white/40 hover:text-white'}`}>المحادثات</button>
+          
+          {/* تبويب المحادثات مع شارة التنبيه اللحظية */}
+          <button 
+            onClick={() => setActiveTab('chats')} 
+            className={`text-base md:text-xl font-black whitespace-nowrap transition-colors relative flex items-center gap-2 ${activeTab === 'chats' ? 'text-amber-500' : 'text-white/40 hover:text-white'}`}
+          >
+            المحادثات
+            {unreadChatsCount > 0 && (
+              <span className="bg-red-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold animate-pulse">
+                +{unreadChatsCount}
+              </span>
+            )}
+          </button>
         </div>
         <button onClick={loadData} className={`text-amber-500/70 hover:text-amber-500 transition-all self-end sm:self-auto ${loading ? 'animate-spin' : ''}`}><RefreshCw size={22} /></button>
       </div>

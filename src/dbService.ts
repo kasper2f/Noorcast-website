@@ -14,7 +14,7 @@ const firebaseConfig = {
   databaseURL: "https://noorcast-53ecf-default-rtdb.firebaseio.com/"
 };
 
-// تهيئة Firebase وتصدير app ليتم استخدامه في chatService.ts
+// تهيئة Firebase وتصدير app ليتم استخدامة في chatService.ts
 export const app = initializeApp(firebaseConfig);
 
 // --- دوال الطلبات ---

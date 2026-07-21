@@ -24,6 +24,11 @@ export default function App() {
   
   const [pendingServiceId, setPendingServiceId] = useState<string | null>(null);
 
+  // التمرير التلقائي لأعلى الصفحة فوراً عند تغيير أي تبويب أو مشروع
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [activeTab, selectedProject]);
+
   useEffect(() => {
     const handleHash = () => {
       const hash = window.location.hash;
@@ -48,7 +53,21 @@ export default function App() {
         imageUrl: project.mediaUrl || project.imageUrl
     };
     setSourceProject(projectSource); 
-    setPreselectedCategory(project.subCategory || project.category);
+    
+    const categoryName = project.subCategory || project.category || '';
+    
+    // قائمة أقسام الباقات الجاهزة الرئيسية للتوجيه الذكي
+    const packageCategoriesList = ['إدارة المحتوى', 'المتاجر الإلكترونية', 'المواقع الإلكترونية', 'الهوية البصرية', 'التصوير الشهري'];
+    
+    if (packageCategoriesList.includes(categoryName)) {
+      // إذا كانت الفئة تتبع الباقات الجاهزة، نقوم بتوجيه المتجر لفتح قسم الباقات مع حفظ القسم
+      // ملاحظة: يمكنك تمرير الحالة المطلوبة للمتجر أو الاعتماد على معالجة التصنيف هناك
+      setPreselectedCategory(categoryName);
+    } else {
+      // للخدمات الفردية الأخرى
+      setPreselectedCategory(categoryName);
+    }
+
     setActiveTab('store');
     setSelectedProject(null); 
     window.scrollTo({ top: 0, behavior: 'smooth' });

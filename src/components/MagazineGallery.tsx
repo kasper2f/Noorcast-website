@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, X } from 'lucide-react'; 
+import Loader from './Loader';
 
 export default function MagazineGallery({ setActiveTab }: any) {
   const [images, setImages] = useState<any[]>([]);
@@ -55,7 +56,7 @@ export default function MagazineGallery({ setActiveTab }: any) {
       </div>
 
       {loading ? (
-        <div className="text-center text-white/30 italic text-xs md:text-sm">جاري تحميل المجلة...</div>
+        <Loader text="جاري تحميل المجلة الفنية..." />
       ) : (
         <motion.div layout className="columns-2 md:columns-3 xl:columns-4 gap-3 md:gap-4">
           <AnimatePresence>
