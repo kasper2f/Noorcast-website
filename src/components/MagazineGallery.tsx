@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, X } from 'lucide-react'; 
 import Loader from './Loader';
 
-export default function MagazineGallery({ setActiveTab }: any) {
+export default function MagazineGallery({ setActiveTab, initialCategory }: any) {
   const [images, setImages] = useState<any[]>([]);
   const [filter, setFilter] = useState('الكل');
   const [loading, setLoading] = useState(true);
@@ -17,14 +17,36 @@ export default function MagazineGallery({ setActiveTab }: any) {
     fetch(url)
       .then(res => res.json())
       .then(data => {
-        setImages(Array.isArray(data) ? data : []);
+        const loadedImages = Array.isArray(data) ? data : [];
+        setImages(loadedImages);
+        
+        // إذا جاءت خدمة من المتجر، نقوم بتفعيل الفلترة المؤقتة بناءً على الـ subCategory في الشيت
+        if (initialCategory) {
+          setFilter(initialCategory);
+        }
+        
         setLoading(false);
       })
       .catch(err => { console.error("Error:", err); setLoading(false); });
-  }, []);
+  }, [initialCategory]);
 
+  // إبقاء أزرار الفلترة الأصلية في الواجهة كما هي تماماً (أثاث، أشخاص... إلخ) بناءً على الـ category الأساسي
   const categories = ['الكل', ...Array.from(new Set(images.map((img: any) => img.category).filter(Boolean)))];
-  const filteredImages = filter === 'الكل' ? images : images.filter((img: any) => img.category === filter);
+  
+  // فلترة الصور بذكاء: إذا كان المستخدم اختار من الأزرار أو جاء بـ initialCategory من المتجر يطابق الـ subCategory
+  const filteredImages = images.filter((img: any) => {
+    const imgSub = (img.subCategory || '').trim().toLowerCase();
+    const imgCat = (img.category || '').trim().toLowerCase();
+    const currentFilter = filter.trim().toLowerCase();
+
+    // إذا كانت القيمة مساوية تماماً للـ subCategory القادم من المتجر أو مطابقة للزر المختار في الواجهة
+    if (initialCategory && filter === initialCategory) {
+      return imgSub === currentFilter || imgSub.includes(currentFilter) || currentFilter.includes(imgSub);
+    }
+
+    if (filter === 'الكل') return true;
+    return imgCat === currentFilter;
+  });
 
   // التعديل هنا: تغليف بيانات المنفذ في sourceProject
   const handleOrderSimilar = (img: any) => {

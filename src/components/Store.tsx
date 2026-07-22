@@ -7,11 +7,11 @@ import { getServices, getCoupons } from '../dbService';
 import { businessSolutions, packageCategories } from '../Data/data';
 import { BUNDLE_CATEGORIES } from '../Data/bundleConfig';
 
-export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimilar, sourceProject, targetServiceId, onClearTarget }: any) {
+export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimilar, sourceProject, targetServiceId, onClearTarget, setActiveTab }: any) {
   // قائمة أقسام الباقات الجاهزة الرئيسية للتحقق الذكي
   const packageCategoryNames = ['إدارة المحتوى', 'المتاجر الإلكترونية', 'المواقع الإلكترونية', 'الهوية البصرية', 'التصوير الشهري'];
 
-  const [activeTab, setActiveTab] = useState<'packages' | 'services' | 'solutions'>(
+  const [activeTab, setActiveTabStore] = useState<'packages' | 'services' | 'solutions'>(
     preselectedCategory && packageCategoryNames.includes(preselectedCategory) ? 'packages' : 'packages'
   );
   const [activePackageCat, setActivePackageCat] = useState('cat2');
@@ -33,13 +33,13 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
   useEffect(() => {
     if (preselectedCategory) {
       if (packageCategoryNames.includes(preselectedCategory)) {
-        setActiveTab('packages');
+        setActiveTabStore('packages');
         const matchedCat = packageCategories.find((c: any) => c.name === preselectedCategory);
         if (matchedCat) {
           setActivePackageCat(matchedCat.id);
         }
       } else {
-        setActiveTab('services');
+        setActiveTabStore('services');
         setSearchQuery(preselectedCategory); 
         setSelectedCategory('الكل'); 
       }
@@ -66,7 +66,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
   // إصلاح جذري لضمان عمل التوجيه والبحث عن الخدمة بدقة فائقة على الجوال واللابتوب معاً
   useEffect(() => {
     if (targetServiceId && !isLoading && ourServices.length > 0) {
-      setActiveTab('services');
+      setActiveTabStore('services');
       setSearchQuery(''); // مسح أي بحث قديم لضمان ظهور الخدمة المستهدفة
       setSelectedCategory('الكل');
 
@@ -95,6 +95,13 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
       }
     }
   }, [targetServiceId, isLoading, ourServices, onClearTarget]);
+
+  // دالة ذكية لتوجيه زر استعراض الأعمال إلى المجلة الفنية مباشرة
+  const handleViewMagazine = (categoryName: string) => {
+    if (onOrderSimilar) {
+      onOrderSimilar(categoryName);
+    }
+  };
 
   const handleApplyCoupon = () => {
     const found = coupons.find(c => String(c.Code).trim() === couponCode.trim() && String(c.Active).trim().toUpperCase() === 'TRUE');
@@ -186,7 +193,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
       
       <div className="flex justify-start md:justify-center gap-2 md:gap-4 mb-8 md:mb-16 overflow-x-auto pb-2 scrollbar-none">
         {['packages', 'solutions', 'services'].map((tab) => (
-          <button key={tab} onClick={() => { setActiveTab(tab as any); setSearchQuery(''); setSelectedCategory('الكل'); }} className={`px-4 md:px-6 py-2.5 md:py-3 rounded-full text-xs md:text-sm font-bold whitespace-nowrap transition-all ${activeTab === tab ? 'bg-amber-500 text-black' : 'bg-[#121212] text-white border border-white/5'}`}>
+          <button key={tab} onClick={() => { setActiveTabStore(tab as any); setSearchQuery(''); setSelectedCategory('الكل'); }} className={`px-4 md:px-6 py-2.5 md:py-3 rounded-full text-xs md:text-sm font-bold whitespace-nowrap transition-all ${activeTab === tab ? 'bg-amber-500 text-black' : 'bg-[#121212] text-white border border-white/5'}`}>
             {tab === 'packages' ? 'الباقات الجاهزة' : tab === 'solutions' ? 'حلول الأعمال' : 'خدماتنا'}
           </button>
         ))}
@@ -245,11 +252,9 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
                 <button onClick={() => openBooking({ title: sol.name, price: sol.price.toLocaleString() + ' ر.س' })} className="w-full bg-white text-black py-3 rounded-xl font-black hover:bg-amber-500 transition-all shadow-md text-xs md:text-sm">
                   طلب هذا الحل
                 </button>
-                {onOrderSimilar && (
-                  <button onClick={() => onOrderSimilar(sol.name)} className="w-full bg-white/5 text-amber-500 py-2.5 rounded-xl font-bold hover:bg-white/10 transition-all text-xs flex items-center justify-center gap-1.5 border border-white/5">
-                    <Eye size={14} /> استعرض أعمال هذا الحل
-                  </button>
-                )}
+                <button onClick={() => handleViewMagazine(sol.name)} className="w-full bg-white/5 text-amber-500 py-2.5 rounded-xl font-bold hover:bg-white/10 transition-all text-xs flex items-center justify-center gap-1.5 border border-white/5">
+                  <Eye size={14} /> استعرض أعمال هذا الحل
+                </button>
               </div>
             </div>
           ))}
@@ -290,8 +295,8 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
                   </div>
                   <div className="space-y-2.5">
                     <button onClick={() => openBooking(pkg)} className="w-full bg-white text-black py-3 rounded-xl font-bold text-xs md:text-sm hover:bg-amber-500 transition-all">حجز الباقة فوراً</button>
-                    {onOrderSimilar && currentCatName && (
-                      <button onClick={() => onOrderSimilar(currentCatName)} className="w-full bg-white/5 text-amber-500 py-2.5 rounded-xl font-bold hover:bg-white/10 transition-all text-xs flex items-center justify-center gap-1.5 border border-white/5">
+                    {currentCatName && (
+                      <button onClick={() => handleViewMagazine(currentCatName)} className="w-full bg-white/5 text-amber-500 py-2.5 rounded-xl font-bold hover:bg-white/10 transition-all text-xs flex items-center justify-center gap-1.5 border border-white/5">
                         <Eye size={14} /> استعرض أعمال هذا القسم
                       </button>
                     )}
@@ -315,9 +320,12 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
                   </div>
                   <p className="text-white/50 text-[10px] sm:text-xs md:text-sm mb-3 leading-relaxed w-full">{s.description}</p>
                   <div className="border-t border-white/10 my-2 md:my-3 w-full"></div>
-                  {onOrderSimilar && (
-                    <button onClick={() => onOrderSimilar(s.category)} className="text-[9px] sm:text-[11px] text-amber-500 font-bold mb-3 hover:underline text-right block truncate w-full">استعرض أعمال هذه الخدمة</button>
-                  )}
+                  
+                  {/* زر استعراض أعمال هذه الخدمة موجه مباشرة للمجلة الفنية */}
+                  <button onClick={() => handleViewMagazine(s.title)} className="text-[9px] sm:text-[11px] text-amber-500 font-bold mb-3 hover:underline text-right block truncate w-full">
+                    استعرض أعمال هذه الخدمة
+                  </button>
+
                   <div className="flex flex-wrap content-start gap-1.5 md:gap-2 mb-4 md:mb-8 flex-grow w-full">
                     {(s.features || []).map((f: string, i: number) => (
                       <span key={i} className="bg-white/5 px-2 py-0.5 md:py-1 rounded text-[9px] md:text-[11px] text-white/70 flex items-center gap-1 w-fit"><CheckCircle size={10} className="text-amber-500 shrink-0" /> {f}</span>
@@ -328,7 +336,9 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
                 <div className="mt-auto pt-3 md:pt-5 border-t border-white/5 w-full">
                   {(s.addons || []).map((a: any) => (
                     <div key={a.id} className="flex items-center justify-between w-full mb-2 gap-1.5">
-                        <span className={`text-[10px] sm:text-xs flex-1 text-right truncate ${s.count > 0 ? 'text-white/70' : 'text-white/25'}`} title={a.title}>{a.title}</span>
+                        <span className={`text-[10px] sm:text-xs flex-1 text-right truncate ${s.count > 0 ? 'text-white/70' : 'text-white/25'}`} title={a.title}>
+                          {a.title} {a.price ? `(${a.price} ر.س)` : ''}
+                        </span>
                         <div className="flex items-center gap-1.5 shrink-0">
                             <button onClick={() => updateAddonCount(s.id, a.title, -1, s.count)} disabled={s.count === 0} className="text-white/50 hover:text-white disabled:opacity-20"><MinusCircle size={14}/></button>
                             <span className="text-[10px] sm:text-xs font-bold w-3 text-center">{selectedAddons[s.id]?.[a.title] || 0}</span>

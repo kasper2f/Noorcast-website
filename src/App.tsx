@@ -60,11 +60,8 @@ export default function App() {
     const packageCategoriesList = ['إدارة المحتوى', 'المتاجر الإلكترونية', 'المواقع الإلكترونية', 'الهوية البصرية', 'التصوير الشهري'];
     
     if (packageCategoriesList.includes(categoryName)) {
-      // إذا كانت الفئة تتبع الباقات الجاهزة، نقوم بتوجيه المتجر لفتح قسم الباقات مع حفظ القسم
-      // ملاحظة: يمكنك تمرير الحالة المطلوبة للمتجر أو الاعتماد على معالجة التصنيف هناك
       setPreselectedCategory(categoryName);
     } else {
-      // للخدمات الفردية الأخرى
       setPreselectedCategory(categoryName);
     }
 
@@ -85,9 +82,23 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // دالة ذكية لتوجيه زر "استعرض أعمال هذه الخدمة" من المتجر بناءً على طبيعة القسم (صور/جرافيك -> المجلة الفنية، فيديو -> معرض الأعمال)
   const handleViewSimilarPortfolio = (category: string) => {
+    const cleanCategory = (category || '').trim().toLowerCase();
+    
+    // الكلمات المفتاحية التي تتبع المجلة الفنية (الصور، التصوير الفوتوغرافي، الجرافيك، الآيف ستايل، إلخ)
+    const magazineKeywords = ['صور', 'تصوير', 'فوتو', 'جرافيك', 'هوية', 'تصميم', 'إيف ستايل', 'لايف ستايل', 'منتجات'];
+    
+    const isMagazineTarget = magazineKeywords.some(keyword => cleanCategory.includes(keyword));
+
     setPreselectedCategory(category);
-    setActiveTab('portfolio');
+    
+    if (isMagazineTarget) {
+      setActiveTab('magazine'); // توجيه ذكي للمجلة الفنية
+    } else {
+      setActiveTab('portfolio'); // توجيه لمعرض الأعمال المرئي
+    }
+
     setSelectedProject(null);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -175,7 +186,7 @@ export default function App() {
                 />
               )}
               
-              {activeTab === 'magazine' && <MagazineGallery setActiveTab={handleMagazineOrder} />}
+              {activeTab === 'magazine' && <MagazineGallery setActiveTab={handleMagazineOrder} initialCategory={preselectedCategory} />}
               
               {activeTab === 'store' && (
                 <Store 

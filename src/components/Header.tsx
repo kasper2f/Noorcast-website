@@ -100,7 +100,7 @@ export default function Header({ activeTab, setActiveTab }: any) {
 
           <div className="text-right">
             <h1 className="text-xl md:text-[28px] font-bold text-white leading-tight">NoorCast</h1>
-            <span className="text-[7px] md:text-[8px] text-purple-400 tracking-[0.2em] uppercase font-black block">Creative Commerce Platform</span>
+            <span className="text-[7px] md:text-[8px] text-purple-400 tracking-[0.2em] uppercase font-black block">Creative Solutions</span>
           </div>
         </div>
 
