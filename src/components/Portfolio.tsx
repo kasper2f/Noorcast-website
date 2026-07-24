@@ -17,6 +17,12 @@ export default function Portfolio({ isAdmin, onOrderSimilar, setSelectedProject,
   const [selectedCategory, setSelectedCategory] = useState(filterCategory || 'الكل');
 
   useEffect(() => {
+    if (filterCategory) {
+      setSelectedCategory(filterCategory);
+    }
+  }, [filterCategory]);
+
+  useEffect(() => {
     const loadPortfolio = async () => {
       setIsLoading(true);
       const data = await getPortfolio();
@@ -28,9 +34,21 @@ export default function Portfolio({ isAdmin, onOrderSimilar, setSelectedProject,
 
   const categories = ['الكل', ...Array.from(new Set(portfolioItems.map(item => item.category || 'أخرى')))];
 
+  // الفلترة الذكية المطابقة بالحرف للتصنيف العام أو التصنيف الفرعي (subCategory) أو عنوان المشروع
   const displayedPortfolio = selectedCategory === 'الكل' 
     ? portfolioItems 
-    : portfolioItems.filter(item => item.category === selectedCategory);
+    : portfolioItems.filter(item => {
+        const cleanFilter = selectedCategory.trim().toLowerCase();
+        const itemCat = (item.category || '').trim().toLowerCase();
+        const itemSubCat = (item.subCategory || '').trim().toLowerCase();
+        const itemTitle = (item.title || '').trim().toLowerCase();
+
+        return itemCat === cleanFilter || 
+               itemSubCat === cleanFilter || 
+               itemSubCat.includes(cleanFilter) || 
+               cleanFilter.includes(itemSubCat) ||
+               itemTitle === cleanFilter;
+      });
 
   const handleOrderSimilar = (item: any) => {
     const dataToSend = {
@@ -109,7 +127,7 @@ export default function Portfolio({ isAdmin, onOrderSimilar, setSelectedProject,
 
                 {/* عناوين مرتبطة وبأحجام منضبطة تماماً */}
                 <h2 className="text-base md:text-xl font-bold text-white group-hover:text-amber-500 transition-colors leading-snug">{item.title}</h2>
-                <p className="text-[10px] md:text-xs text-amber-500/80 font-bold mt-1 uppercase tracking-wider">{item.category}</p>
+                <p className="text-[10px] md:text-xs text-amber-500/80 font-bold mt-1 uppercase tracking-wider">{item.subCategory || item.category}</p>
                 <p className="text-xs text-white/50 mt-2.5 line-clamp-2 leading-relaxed">{item.description}</p>
               </div>
               

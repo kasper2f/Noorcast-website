@@ -82,7 +82,7 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // دالة ذكية لتوجيه زر "استعرض أعمال هذه الخدمة" من المتجر بناءً على طبيعة القسم (صور/جرافيك -> المجلة الفنية، فيديو -> معرض الأعمال)
+  // دالة ذكية لتوجيه زر "استعرض أعمال هذه الخدمة" بدقة تامة بالحرف مع الحفاظ على التوجيه الصحيح بين المجلة ومعرض الأعمال
   const handleViewSimilarPortfolio = (category: string) => {
     const cleanCategory = (category || '').trim().toLowerCase();
     
@@ -94,9 +94,9 @@ export default function App() {
     setPreselectedCategory(category);
     
     if (isMagazineTarget) {
-      setActiveTab('magazine'); // توجيه ذكي للمجلة الفنية
+      setActiveTab('magazine'); // توجيه للمجلة الفنية بالاسم الفرعي بالحرف
     } else {
-      setActiveTab('portfolio'); // توجيه لمعرض الأعمال المرئي
+      setActiveTab('portfolio'); // توجيه لمعرض الأعمال المرئي بالاسم الفرعي بالحرف
     }
 
     setSelectedProject(null);

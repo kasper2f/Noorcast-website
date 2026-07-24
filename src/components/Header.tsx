@@ -90,7 +90,7 @@ export default function Header({ activeTab, setActiveTab }: any) {
               alt="Noorcast Logo" 
               className="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]" 
             />
-            {/* شارة إشعارات خفية تظهر على الشعار إذا كانت هناك رسائل جديدة لتنبهك */}
+            {/* شارة إشعارات خفية تظهر حصرياً على الشعار لتنبهك */}
             {unreadChatsCount > 0 && (
               <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-bold animate-pulse shadow-md">
                 {unreadChatsCount}
@@ -138,18 +138,13 @@ export default function Header({ activeTab, setActiveTab }: any) {
             </button>
           </div>
 
-          {/* زر القائمة المنسدلة للجوال (Hamburger Menu Button) */}
+          {/* زر القائمة المنسدلة للجوال (بدون أي شارة إشعارات) */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="lg:hidden relative text-white bg-white/5 p-2.5 rounded-xl border border-white/10 hover:bg-white/10 transition-all focus:outline-none"
             aria-label="Toggle menu"
           >
             {mobileMenuOpen ? <X size={22} className="text-purple-400" /> : <Menu size={22} />}
-            {unreadChatsCount > 0 && !mobileMenuOpen && (
-              <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-bold animate-pulse">
-                {unreadChatsCount}
-              </span>
-            )}
           </button>
         </div>
       </div>

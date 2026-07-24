@@ -96,10 +96,11 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
     }
   }, [targetServiceId, isLoading, ourServices, onClearTarget]);
 
-  // دالة ذكية لتوجيه زر استعراض الأعمال إلى المجلة الفنية مباشرة
-  const handleViewMagazine = (categoryName: string) => {
+  // دالة ذكية لتوجيه زر استعراض الأعمال مع الاعتماد الحرفي على الـ subCategory إن وجد أو عنوان الخدمة
+  const handleViewMagazine = (serviceItem: any) => {
     if (onOrderSimilar) {
-      onOrderSimilar(categoryName);
+      const targetQuery = serviceItem.subCategory || serviceItem.title;
+      onOrderSimilar(targetQuery);
     }
   };
 
@@ -229,7 +230,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
                 )}
 
                 <div className="mb-5">
-                  <span className="text-xs font-bold text-white block mb-2 border-b border-white/10 pb-2">ماذا يشمل؟</span>
+                  <span className="text-xs font-bold text-white block mb-2 border-b border-white/10 pb-2">هذه الخدمة تشمل</span>
                   <ul className="text-white/70 text-xs space-y-2 flex-grow">
                     {sol.features.map((f: string, i: number) => (
                       <li key={i} className="flex items-start gap-2 leading-relaxed">
@@ -252,7 +253,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
                 <button onClick={() => openBooking({ title: sol.name, price: sol.price.toLocaleString() + ' ر.س' })} className="w-full bg-white text-black py-3 rounded-xl font-black hover:bg-amber-500 transition-all shadow-md text-xs md:text-sm">
                   طلب هذا الحل
                 </button>
-                <button onClick={() => handleViewMagazine(sol.name)} className="w-full bg-white/5 text-amber-500 py-2.5 rounded-xl font-bold hover:bg-white/10 transition-all text-xs flex items-center justify-center gap-1.5 border border-white/5">
+                <button onClick={() => handleViewMagazine(sol)} className="w-full bg-white/5 text-amber-500 py-2.5 rounded-xl font-bold hover:bg-white/10 transition-all text-xs flex items-center justify-center gap-1.5 border border-white/5">
                   <Eye size={14} /> استعرض أعمال هذا الحل
                 </button>
               </div>
@@ -289,6 +290,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
                   <div>
                     <h3 className="text-base md:text-xl font-bold mb-2">{pkg.name}</h3>
                     <div className="text-lg md:text-2xl font-black text-amber-500 mb-4 md:mb-6">{pkg.price.toLocaleString()} ر.س</div>
+                    <span className="text-xs font-bold text-white block mb-2">هذه الخدمة تشمل</span>
                     <ul className="text-white/60 text-xs md:text-sm mb-6 md:mb-8 space-y-2 flex-grow">
                       {pkg.features.map((f: any, i: any) => <li key={i} className="flex items-center gap-2"> <CheckCircle size={14} className="text-amber-500 shrink-0" /> {f}</li>)}
                     </ul>
@@ -296,7 +298,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
                   <div className="space-y-2.5">
                     <button onClick={() => openBooking(pkg)} className="w-full bg-white text-black py-3 rounded-xl font-bold text-xs md:text-sm hover:bg-amber-500 transition-all">حجز الباقة فوراً</button>
                     {currentCatName && (
-                      <button onClick={() => handleViewMagazine(currentCatName)} className="w-full bg-white/5 text-amber-500 py-2.5 rounded-xl font-bold hover:bg-white/10 transition-all text-xs flex items-center justify-center gap-1.5 border border-white/5">
+                      <button onClick={() => handleViewMagazine({ title: currentCatName })} className="w-full bg-white/5 text-amber-500 py-2.5 rounded-xl font-bold hover:bg-white/10 transition-all text-xs flex items-center justify-center gap-1.5 border border-white/5">
                         <Eye size={14} /> استعرض أعمال هذا القسم
                       </button>
                     )}
@@ -321,11 +323,12 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
                   <p className="text-white/50 text-[10px] sm:text-xs md:text-sm mb-3 leading-relaxed w-full">{s.description}</p>
                   <div className="border-t border-white/10 my-2 md:my-3 w-full"></div>
                   
-                  {/* زر استعراض أعمال هذه الخدمة موجه مباشرة للمجلة الفنية */}
-                  <button onClick={() => handleViewMagazine(s.title)} className="text-[9px] sm:text-[11px] text-amber-500 font-bold mb-3 hover:underline text-right block truncate w-full">
+                  {/* زر استعراض أعمال هذه الخدمة يعتمد على الـ subCategory بالحرف أو عنوان الخدمة */}
+                  <button onClick={() => handleViewMagazine(s)} className="text-[9px] sm:text-[11px] text-amber-500 font-bold mb-3 hover:underline text-right block truncate w-full">
                     استعرض أعمال هذه الخدمة
                   </button>
 
+                  <span className="text-[10px] sm:text-xs font-bold text-white block mb-1.5">هذه الخدمة تشمل</span>
                   <div className="flex flex-wrap content-start gap-1.5 md:gap-2 mb-4 md:mb-8 flex-grow w-full">
                     {(s.features || []).map((f: string, i: number) => (
                       <span key={i} className="bg-white/5 px-2 py-0.5 md:py-1 rounded text-[9px] md:text-[11px] text-white/70 flex items-center gap-1 w-fit"><CheckCircle size={10} className="text-amber-500 shrink-0" /> {f}</span>
@@ -334,6 +337,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
                 </div>
 
                 <div className="mt-auto pt-3 md:pt-5 border-t border-white/5 w-full">
+                  <span className="text-[10px] sm:text-xs font-bold text-amber-400 block mb-2">ليكتمل مشروعك:</span>
                   {(s.addons || []).map((a: any) => (
                     <div key={a.id} className="flex items-center justify-between w-full mb-2 gap-1.5">
                         <span className={`text-[10px] sm:text-xs flex-1 text-right truncate ${s.count > 0 ? 'text-white/70' : 'text-white/25'}`} title={a.title}>
