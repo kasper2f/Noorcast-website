@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
-import { getOrders, updateOrderStatus, getServices, addService, deleteService, updateService } from '../dbService';
+import { getOrders, updateOrderStatus, getServices, addService, deleteService, updateService, getAdmins } from '../dbService';
 import { RefreshCw, MessageCircle, ShieldAlert, Plus, Trash2, Edit2, Search, Send, Menu, X } from 'lucide-react';
 import { listenToChat, sendMessage } from '../services/chatService';
 import { ref, getDatabase, onValue, remove } from 'firebase/database';
+import { logActivity } from './logger';
 
 export default function AdminDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
@@ -126,7 +127,19 @@ export default function AdminDashboard() {
   };
 
   const handleStatusChange = async (orderId: string, newStatus: string) => {
+    const orderBefore = orders.find((o: any) => o.orderId === orderId);
+    const oldStatus = orderBefore?.status || 'جديد';
+    
     await updateOrderStatus(orderId, newStatus);
+    
+    // تسجيل العملية في Audit Log
+    await logActivity({
+      adminEmail: email,
+      action: 'UPDATE_ORDER',
+      target: `Order #${orderId}`,
+      details: `Changed status from ${oldStatus} to ${newStatus}`
+    });
+
     loadData();
   };
 
@@ -142,12 +155,31 @@ export default function AdminDashboard() {
       })) : []
     };
     await addService(formattedService);
+
+    // تسجيل العملية في Audit Log
+    await logActivity({
+      adminEmail: email,
+      action: 'ADD_SERVICE',
+      target: newService.title,
+      details: `Added new service with price ${newService.price} SAR`
+    });
+
     setNewService({ title: '', price: '', description: '', category: '', features: '', addons: '' });
     loadData();
   };
 
   const handleDeleteService = async (serviceId: string) => {
+    const targetService = services.find((s: any) => s.id === serviceId);
     await deleteService(serviceId);
+
+    // تسجيل العملية في Audit Log
+    await logActivity({
+      adminEmail: email,
+      action: 'DELETE_SERVICE',
+      target: targetService ? targetService.title : `Service ID: ${serviceId}`,
+      details: `Deleted service`
+    });
+
     loadData();
   };
 
@@ -162,6 +194,15 @@ export default function AdminDashboard() {
         })) : editingService.addons
     };
     await updateService(updated);
+
+    // تسجيل العملية في Audit Log
+    await logActivity({
+      adminEmail: email,
+      action: 'UPDATE_SERVICE',
+      target: updated.title,
+      details: `Updated service details`
+    });
+
     setEditingService(null);
     loadData();
   };
@@ -181,9 +222,37 @@ export default function AdminDashboard() {
             <input type="email" placeholder="البريد الإلكتروني" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-xs md:text-sm outline-none focus:border-amber-500 text-white" />
             <input type="password" placeholder="كلمة المرور" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-xs md:text-sm outline-none focus:border-amber-500 text-white" />
             <button 
-              onClick={() => { 
-                if (email === 'nc' && password === '1234') setIsAuthenticated(true); 
-                else alert('بيانات الدخول غير صحيحة، يرجى المحاولة مرة أخرى.'); 
+              onClick={async () => { 
+                try {
+                  const admins = await getAdmins();
+                  const matchedAdmin = admins.find((admin: any) => 
+                    admin.email?.trim().toLowerCase() === email.trim().toLowerCase() && 
+                    String(admin.password).trim() === String(password).trim()
+                  );
+
+                  if (matchedAdmin) {
+                    setIsAuthenticated(true);
+                    // تسجيل دخول ناجح في الـ Audit Log
+                    await logActivity({
+                      adminEmail: email,
+                      action: 'LOGIN_SUCCESS',
+                      target: 'Admin Dashboard',
+                      details: 'Successful login'
+                    });
+                  } else {
+                    // تسجيل محاولة دخول فاشلة في الـ Audit Log
+                    await logActivity({
+                      adminEmail: email || 'unknown',
+                      action: 'LOGIN_FAILED',
+                      target: 'Admin Dashboard',
+                      details: 'Failed login attempt with invalid credentials'
+                    });
+                    alert('بيانات الدخول غير صحيحة، يرجى المحاولة مرة أخرى.');
+                  }
+                } catch (error) {
+                  console.error('Login error:', error);
+                  alert('حدث خطأ أثناء التحقق من البيانات، يرجى المحاولة مرة أخرى.');
+                }
               }} 
               className="w-full bg-amber-500 text-black py-3 rounded-xl font-bold text-xs md:text-sm shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] transition-all"
             >

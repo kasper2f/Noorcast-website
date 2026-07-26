@@ -59,6 +59,18 @@ export const updateOrderStatus = async (orderId: string, status: string) => {
   }
 };
 
+// --- دوال المشرفين (Admins) ---
+
+export const getAdmins = async () => {
+  try {
+    const response = await fetch(GOOGLE_SCRIPT_URL + '?action=getAdmins&_t=' + Date.now());
+    return await response.json();
+  } catch (error) {
+    console.error("Error fetching admins:", error);
+    return [];
+  }
+};
+
 // --- دوال الخدمات والكوبونات ---
 
 export const getServices = async () => {
