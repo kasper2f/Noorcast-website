@@ -21,7 +21,7 @@ export const app = initializeApp(firebaseConfig);
 
 export const getOrders = async () => {
   try {
-    const response = await fetch(GOOGLE_SCRIPT_URL + '?action=get');
+    const response = await fetch(GOOGLE_SCRIPT_URL + '?action=get&_t=' + Date.now());
     return await response.json();
   } catch (error) {
     console.error("Error fetching orders:", error);
@@ -33,8 +33,7 @@ export const createOrder = async (orderData: any) => {
   try {
     await fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action: 'create', ...orderData })
     });
     return "Success";
@@ -48,8 +47,7 @@ export const updateOrderStatus = async (orderId: string, status: string) => {
   try {
     await fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action: 'update', orderId, status })
     });
     return "Success";
@@ -78,7 +76,6 @@ export const getServices = async () => {
     const response = await fetch(GOOGLE_SCRIPT_URL + '?action=getServices&_t=' + Date.now());
     const data = await response.json();
     
-    // تعديل التنظيف: ضمان أن كل تصنيف نظيف من أي مسافات زائدة لضمان تطابق الفلترة
     return Array.isArray(data) ? data.map((s: any) => ({
       ...s,
       category: s.category ? String(s.category).trim() : 'أخرى'
@@ -106,7 +103,6 @@ export const getPortfolio = async () => {
     const response = await fetch(GOOGLE_SCRIPT_URL + '?action=getPortfolio&_t=' + Date.now());
     const data = await response.json();
     
-    // معالجة البيانات وتحويل روابط projectAssets إلى مصفوفة ذكية
     return data.map((item: any) => ({
       ...item,
       projectAssets: item.projectAssets 
@@ -122,16 +118,17 @@ export const getPortfolio = async () => {
   }
 };
 
-// --- دوال إدارة الخدمات ---
+// --- دوال إدارة الخدمات (محدثة لضمان التزامن السريع مع جوجل شيت) ---
 
 export const addService = async (serviceData: any) => {
   try {
     await fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action: 'addService', ...serviceData })
     });
+    // مهلة قصيرة جداً لضمان حفظ جوجل شيت للبيانات قبل إعادة الجلب
+    await new Promise(resolve => setTimeout(resolve, 1000));
     return "Success";
   } catch (error) {
     console.error("Error adding service:", error);
@@ -143,10 +140,10 @@ export const updateService = async (serviceData: any) => {
   try {
     await fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action: 'updateService', ...serviceData })
     });
+    await new Promise(resolve => setTimeout(resolve, 1000));
     return "Success";
   } catch (error) {
     console.error("Error updating service:", error);
@@ -158,10 +155,10 @@ export const deleteService = async (serviceId: string) => {
   try {
     await fetch(GOOGLE_SCRIPT_URL, {
       method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'application/json' },
+      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify({ action: 'deleteService', serviceId })
     });
+    await new Promise(resolve => setTimeout(resolve, 1000));
     return "Success";
   } catch (error) {
     console.error("Error deleting service:", error);

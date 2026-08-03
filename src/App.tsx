@@ -24,27 +24,50 @@ export default function App() {
   
   const [pendingServiceId, setPendingServiceId] = useState<string | null>(null);
 
+  // دعم الروابط المباشرة عبر الـ Hash (مثل #store أو #portfolio) وقراءة الخدمات المباشرة
+  useEffect(() => {
+    const handleHashRoute = () => {
+      const hash = window.location.hash;
+      
+      if (hash.startsWith('#service-')) {
+        const id = hash.replace('#service-', '');
+        setPendingServiceId(id);
+        setActiveTab('store');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      const cleanHash = hash.replace('#', '').trim();
+      const validTabs = ['home', 'portfolio', 'magazine', 'store', 'tracker', 'partners', 'admin'];
+      
+      if (validTabs.includes(cleanHash)) {
+        setActiveTab(cleanHash);
+        setSelectedProject(null);
+      }
+    };
+    
+    window.addEventListener('hashchange', handleHashRoute);
+    handleHashRoute();
+    return () => window.removeEventListener('hashchange', handleHashRoute);
+  }, []);
+
   // التمرير التلقائي لأعلى الصفحة فوراً عند تغيير أي تبويب أو مشروع
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeTab, selectedProject]);
 
-  useEffect(() => {
-    const handleHash = () => {
-      const hash = window.location.hash;
-      if (hash.startsWith('#service-')) {
-        const id = hash.replace('#service-', '');
-        setPendingServiceId(id);
-        setActiveTab('store');
-        window.history.replaceState(null, '', window.location.pathname);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }
-    };
-    
-    window.addEventListener('hashchange', handleHash);
-    handleHash();
-    return () => window.removeEventListener('hashchange', handleHash);
-  }, []);
+  // دالة لتغيير التبويب وتحديث مسار الـ Hash في المتصفح ليطابق الرابط المباشر
+  const changeTabAndRoute = (tab: string) => {
+    setActiveTab(tab);
+    setSelectedProject(null);
+    if (tab !== 'store') {
+      setPreselectedCategory(undefined);
+      setSourceProject(null);
+      setPendingServiceId(null);
+    }
+    window.location.hash = tab === 'home' ? '' : tab;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
 
   const handleOrderSimilar = (project: any) => {
     const projectSource = project.sourceProject || {
@@ -55,8 +78,6 @@ export default function App() {
     setSourceProject(projectSource); 
     
     const categoryName = project.subCategory || project.category || '';
-    
-    // قائمة أقسام الباقات الجاهزة الرئيسية للتوجيه الذكي
     const packageCategoriesList = ['إدارة المحتوى', 'المتاجر الإلكترونية', 'المواقع الإلكترونية', 'الهوية البصرية', 'التصوير الشهري'];
     
     if (packageCategoriesList.includes(categoryName)) {
@@ -65,9 +86,8 @@ export default function App() {
       setPreselectedCategory(categoryName);
     }
 
-    setActiveTab('store');
+    changeTabAndRoute('store');
     setSelectedProject(null); 
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleMagazineOrder = (item: any) => {
@@ -78,60 +98,42 @@ export default function App() {
     });
     const targetCategory = item.subCategory || item.category;
     setPreselectedCategory(targetCategory);
-    setActiveTab('store');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    changeTabAndRoute('store');
   };
 
-  // دالة ذكية لتوجيه زر "استعرض أعمال هذه الخدمة" بدقة تامة بالحرف مع الحفاظ على التوجيه الصحيح بين المجلة ومعرض الأعمال
   const handleViewSimilarPortfolio = (category: string) => {
     const cleanCategory = (category || '').trim().toLowerCase();
-    
-    // الكلمات المفتاحية التي تتبع المجلة الفنية (الصور، التصوير الفوتوغرافي، الجرافيك، الآيف ستايل، إلخ)
     const magazineKeywords = ['صور', 'تصوير', 'فوتو', 'جرافيك', 'هوية', 'تصميم', 'إيف ستايل', 'لايف ستايل', 'منتجات'];
-    
     const isMagazineTarget = magazineKeywords.some(keyword => cleanCategory.includes(keyword));
 
     setPreselectedCategory(category);
     
     if (isMagazineTarget) {
-      setActiveTab('magazine'); // توجيه للمجلة الفنية بالاسم الفرعي بالحرف
+      changeTabAndRoute('magazine');
     } else {
-      setActiveTab('portfolio'); // توجيه لمعرض الأعمال المرئي بالاسم الفرعي بالحرف
+      changeTabAndRoute('portfolio');
     }
 
     setSelectedProject(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // دالة التعامل مع الضغط على الخدمة في صفحة تفاصيل المشروع للانتقال المباشر لها في المتجر
   const handleServiceClick = (serviceName: string) => {
     setPendingServiceId(serviceName);
-    setActiveTab('store');
+    changeTabAndRoute('store');
     setSelectedProject(null);
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const handleOrderSuccess = (orderId: string) => {
     setPreselectedCategory(undefined);
     setSourceProject(null); 
-    setActiveTab('tracker');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    changeTabAndRoute('tracker');
   };
 
   return (
     <div className="min-h-screen bg-[#0A0A0B] text-[#F8FAFC] font-sans selection:bg-amber-500 selection:text-black flex flex-col relative" dir="rtl">
       <Header 
         activeTab={activeTab} 
-        setActiveTab={(tab: string) => {
-          setActiveTab(tab);
-          setSelectedProject(null); 
-          if (tab !== 'store') {
-            setPreselectedCategory(undefined);
-            setSourceProject(null);
-            setPendingServiceId(null);
-          }
-          window.scrollTo({ top: 0, behavior: 'smooth' });
-        }} 
+        setActiveTab={changeTabAndRoute} 
         isAdmin={isAdmin} 
         setIsAdmin={setIsAdmin} 
       />
@@ -160,16 +162,14 @@ export default function App() {
             >
               {activeTab === 'home' && (
                 <div className="space-y-0 pb-16">
-                  <Hero setActiveTab={setActiveTab} />
+                  <Hero setActiveTab={changeTabAndRoute} />
                   <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}><WhyUs /></motion.div>
-                  
-                  {/* إضافة قسم خطوات العمل هنا بشكل أنيق ومتناسق */}
                   <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6 }}><Workflow /></motion.div>
 
                   <motion.div initial={{ opacity: 0, y: 50 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }} transition={{ duration: 0.6, delay: 0.2 }}>
                     <PortfolioPreview 
                         onOrderSimilar={handleOrderSimilar} 
-                        setActiveTab={setActiveTab} 
+                        setActiveTab={changeTabAndRoute} 
                         setSelectedProject={setSelectedProject} 
                     />
                   </motion.div>
@@ -208,10 +208,7 @@ export default function App() {
       </main>
 
       <ChatWidget />
-      <Footer setActiveTab={(tab: string) => {
-        setActiveTab(tab);
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      }} />
+      <Footer setActiveTab={changeTabAndRoute} />
     </div>
   );
 }

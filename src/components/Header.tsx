@@ -1,37 +1,9 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { LayoutGrid, Briefcase, Users, Package, Search, Camera, Menu, X, Mail } from 'lucide-react';
-import { ref, getDatabase, onValue } from 'firebase/database';
 
 export default function Header({ activeTab, setActiveTab }: any) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [unreadChatsCount, setUnreadChatsCount] = useState(0);
   const [logoClicks, setLogoClicks] = useState(0);
-
-  // مراقبة المحادثات في الفايربيز لتحديث عداد الإشعارات في الخلفية
-  useEffect(() => {
-    const db = getDatabase();
-    const chatsRef = ref(db, 'chats');
-    return onValue(chatsRef, (snapshot) => {
-      if (snapshot.exists()) {
-        const chatsData = snapshot.val();
-        const users = Object.keys(chatsData);
-        let unreadCount = 0;
-        users.forEach(user => {
-          const userMessages = chatsData[user];
-          if (userMessages) {
-            const msgsArray = Object.values(userMessages) as any[];
-            const lastMsg = msgsArray[msgsArray.length - 1];
-            if (lastMsg && lastMsg.sender !== 'admin') {
-              unreadCount++;
-            }
-          }
-        });
-        setUnreadChatsCount(unreadCount);
-      } else {
-        setUnreadChatsCount(0);
-      }
-    });
-  }, []);
 
   const menuItems = [
     { name: 'الرئيسية', tab: 'home', icon: <LayoutGrid size={18} /> },
@@ -64,11 +36,9 @@ export default function Header({ activeTab, setActiveTab }: any) {
         setActiveTab('admin');
         return 0; // إعادة تعيين العداد
       }
-      // إعادة تعيين العداد إذا تأخر المستخدم في الضغطات (خلال ثانية واحدة)
       setTimeout(() => setLogoClicks(0), 1000);
       return newCount;
     });
-    // الانتقال للرئيسية إذا لم تتم الـ 3 ضغطات
     if (logoClicks === 0) {
       handleTabClick('home');
     }
@@ -78,7 +48,7 @@ export default function Header({ activeTab, setActiveTab }: any) {
     <header className="sticky top-0 z-50 bg-[#0A0A0B] border-b border-white/10 px-4 md:px-6 py-3">
       <div className="max-w-[1400px] mx-auto flex items-center justify-between">
         
-        {/* الشعار مع ميزة الضغط السري (3 مرات) */}
+        {/* الشعار مع ميزة الضغط السري (3 مرات) بدون إشعارات */}
         <div 
           className="flex items-center cursor-pointer hover:opacity-80 transition-opacity relative" 
           onClick={handleLogoClick}
@@ -90,12 +60,6 @@ export default function Header({ activeTab, setActiveTab }: any) {
               alt="Noorcast Logo" 
               className="w-full h-full object-contain drop-shadow-[0_0_10px_rgba(168,85,247,0.5)]" 
             />
-            {/* شارة إشعارات خفية تظهر حصرياً على الشعار لتنبهك */}
-            {unreadChatsCount > 0 && (
-              <span className="absolute top-1 right-1 bg-red-500 text-white text-[9px] w-4 h-4 flex items-center justify-center rounded-full font-bold animate-pulse shadow-md">
-                {unreadChatsCount}
-              </span>
-            )}
           </div>
 
           <div className="text-right">
@@ -138,7 +102,7 @@ export default function Header({ activeTab, setActiveTab }: any) {
             </button>
           </div>
 
-          {/* زر القائمة المنسدلة للجوال (بدون أي شارة إشعارات) */}
+          {/* زر القائمة المنسدلة للجوال */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
             className="lg:hidden relative text-white bg-white/5 p-2.5 rounded-xl border border-white/10 hover:bg-white/10 transition-all focus:outline-none"
@@ -149,7 +113,7 @@ export default function Header({ activeTab, setActiveTab }: any) {
         </div>
       </div>
 
-      {/* قائمة الجوال المنسدلة (تفتح وتغلق بسلاسة بناءً على حالة الزر) */}
+      {/* قائمة الجوال المنسدلة */}
       {mobileMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 right-0 bg-[#0A0A0B]/95 backdrop-blur-xl border-b border-white/10 p-5 shadow-2xl flex flex-col gap-3 animate-fadeIn">
           {menuItems.map((item) => (
