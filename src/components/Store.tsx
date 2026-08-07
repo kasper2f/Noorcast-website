@@ -7,13 +7,20 @@ import { getServices, getCoupons } from '../dbService';
 import { businessSolutions, packageCategories } from '../Data/data';
 import { BUNDLE_CATEGORIES } from '../Data/bundleConfig';
 
-export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimilar, sourceProject, targetServiceId, onClearTarget, setActiveTab }: any) {
+export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimilar, sourceProject, targetServiceId, onClearTarget, setActiveTab, defaultTab }: any) {
   // قائمة أقسام الباقات الجاهزة الرئيسية للتحقق الذكي
   const packageCategoryNames = ['إدارة المحتوى', 'المتاجر الإلكترونية', 'المواقع الإلكترونية', 'الهوية البصرية', 'التصوير الشهري'];
 
   const [activeTab, setActiveTabStore] = useState<'packages' | 'services' | 'solutions'>(
-    preselectedCategory && packageCategoryNames.includes(preselectedCategory) ? 'packages' : 'packages'
+    defaultTab || (preselectedCategory && packageCategoryNames.includes(preselectedCategory) ? 'packages' : 'packages')
   );
+
+  useEffect(() => {
+    if (defaultTab) {
+      setActiveTabStore(defaultTab);
+    }
+  }, [defaultTab]);
+
   const [activePackageCat, setActivePackageCat] = useState('cat2');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [activeBundleType, setActiveBundleType] = useState<keyof typeof BUNDLE_CATEGORIES | null>(null);
@@ -50,11 +57,26 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
     const loadServices = async () => {
       setIsLoading(true);
       const [servicesData, couponsData] = await Promise.all([getServices(), getCoupons()]);
+      
+      const safeParse = (val: any) => {
+        if (!val) return [];
+        if (Array.isArray(val)) return val;
+        if (typeof val === 'string') {
+          try {
+            const parsed = JSON.parse(val);
+            return Array.isArray(parsed) ? parsed : [val];
+          } catch (e) {
+            return val.includes(',') ? val.split(',').map((i: string) => i.trim()) : [val];
+          }
+        }
+        return [];
+      };
+
       const formattedServices = servicesData.map((s: any) => ({ 
         ...s, 
         count: 0, 
-        features: typeof s.features === 'string' ? JSON.parse(s.features || '[]') : (s.features || []),
-        addons: typeof s.addons === 'string' ? JSON.parse(s.addons || '[]') : (s.addons || [])
+        features: safeParse(s.features),
+        addons: safeParse(s.addons)
       }));
       setOurServices(formattedServices);
       setCoupons(couponsData);

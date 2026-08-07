@@ -16,7 +16,7 @@ function AnimatedCounter({ value, suffix = '' }: { value: number; suffix?: strin
   return <motion.span>{rounded}</motion.span>;
 }
 
-export default function Hero({ setActiveTab }: any) {
+export default function Hero({ setActiveTab, setSelectedCategory }: any) {
   const [currentVideoIndex, setCurrentVideoIndex] = useState(0);
 
   useEffect(() => {
@@ -25,6 +25,11 @@ export default function Hero({ setActiveTab }: any) {
     }, 10000);
     return () => clearInterval(timer);
   }, []);
+
+  // دالة الانتقال المباشر لتبويب "خدماتنا" في المتجر
+  const handleStoreServicesClick = () => {
+    setActiveTab('store-services');
+  };
 
   return (
     <section className="bg-[#0A0A0B] py-10 md:py-16 px-4 md:px-6 overflow-hidden">
@@ -53,7 +58,7 @@ export default function Hero({ setActiveTab }: any) {
               {[
                 { title: '🟡 أسعار معلنة', desc: 'اعرف تكلفة مشروعك قبل إرسال الطلب.' },
                 { title: '🟡 خصص خدمتك', desc: 'اختر الإضافات التي تناسب احتياجك فقط.' },
-                { title: '🟡 اطلب مباشرة', desc: 'لا حاجة لانتظار عرض سعر.' },
+                { title: '🟡 تنفيذ بإحترافية', desc: 'جودة في التنفيذ، والتزام بالمواعيد، وتجربة عمل واضحة.' },
                 { title: '🟡 شاهد الأعمال أولاً', desc: 'شاهد الجودة قبل اتخاذ قرار الشراء.' }
               ].map((box, i) => (
                 <div key={i} className="bg-black/40 p-3.5 rounded-2xl border border-white/5 hover:border-amber-500/40 transition-all duration-300 flex flex-col justify-center">
@@ -65,7 +70,13 @@ export default function Hero({ setActiveTab }: any) {
           </div>
 
           <div className="flex flex-wrap items-center gap-3 md:gap-4 pt-4 border-t border-white/5">
-            <button onClick={() => setActiveTab('store')} className="bg-amber-500 text-black px-5 py-2.5 rounded-xl font-black text-xs md:text-sm hover:bg-amber-400 transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)]">زور المتجر مباشرة</button>
+            {/* الزر المعدل لينتقل لتبويب خدماتنا في المتجر مباشرة */}
+            <button 
+              onClick={handleStoreServicesClick} 
+              className="bg-amber-500 text-black px-5 py-2.5 rounded-xl font-black text-xs md:text-sm hover:bg-amber-400 transition-all shadow-[0_0_15px_rgba(245,158,11,0.3)]"
+            >
+              زور المتجر مباشرة
+            </button>
             <button onClick={() => setActiveTab('portfolio')} className="text-white text-xs md:text-sm font-bold hover:text-amber-500 transition-colors">معرض الأعمال ←</button>
           </div>
         </motion.div>

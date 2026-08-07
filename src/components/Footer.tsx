@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin, Mail, Phone } from 'lucide-react'; 
+import { MapPin, Mail, Phone, FileText, Receipt } from 'lucide-react'; 
 import { FaWhatsapp, FaInstagram, FaTiktok } from 'react-icons/fa';
 
 export default function Footer({ setActiveTab }: any) {
@@ -13,7 +13,7 @@ export default function Footer({ setActiveTab }: any) {
 
   const handleLinkClick = (tabName: string) => {
     setActiveTab(tabName);
-    window.scrollTo({ top: 0, behavior: 'smooth' }); // سحب الصفحة لأعلى فور الضغط لضمان رؤية التبويب الجديد
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
@@ -36,15 +36,12 @@ export default function Footer({ setActiveTab }: any) {
             مؤسستنا متخصصة في تقديم حلول إنتاج فني متكامل وصناعة محتوى ترويجي وسينمائي وتطوير حسابات السوشل ميديا للشركات والعلامات التجارية الرائدة لمضاعفة النمو والوصول الرقمي.
           </p>
           <div className="flex gap-3">
-            {/* رابط الواتساب */}
             <a href="https://wa.me/966541550160" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 hover:bg-emerald-500 hover:text-black cursor-pointer transition-all duration-300 text-white/40">
               <FaWhatsapp size={16} />
             </a>
-            {/* رابط تيك توك */}
             <a href="https://www.tiktok.com/@noorcast.sa" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 hover:bg-white hover:text-black cursor-pointer transition-all duration-300 text-white/40">
               <FaTiktok size={14} />
             </a>
-            {/* رابط انستقرام */}
             <a href="https://www.instagram.com/noorcast.sa" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 hover:bg-pink-600 hover:text-white cursor-pointer transition-all duration-300 text-white/40">
               <FaInstagram size={16} />
             </a>
@@ -69,7 +66,7 @@ export default function Footer({ setActiveTab }: any) {
           </ul>
         </div>
 
-        {/* العمود الثالث: معلومات الاتصال الفعالة */}
+        {/* العمود الثالث: معلومات الاتصال */}
         <div className="space-y-4 md:space-y-6">
           <h4 className="font-bold text-base md:text-lg text-white">معلومات الاتصال</h4>
           <div className="space-y-3 md:space-y-4 text-xs md:text-sm text-white/50">
@@ -77,12 +74,10 @@ export default function Footer({ setActiveTab }: any) {
               <MapPin size={16} className="text-purple-500 shrink-0" />
               <span>الرياض، المملكة العربية السعودية</span>
             </div>
-            {/* تم تفعيل البريد الإلكتروني ليفتح تطبيق البريد مباشرة */}
             <a href="mailto:info@noorcast.com" className="flex items-center gap-3 hover:text-purple-400 transition-colors cursor-pointer block">
               <Mail size={16} className="text-purple-500 shrink-0" />
               <span>info@noorcast.com</span>
             </a>
-            {/* تم تفعيل رقم الاتصال ليبدأ الاتصال الهاتفي فوراً عند الضغط عليه من الجوال */}
             <a href="tel:+966541550160" className="flex items-center gap-3 hover:text-purple-400 transition-colors cursor-pointer block">
               <Phone size={16} className="text-purple-500 shrink-0" />
               <span dir="ltr">+966 54 155 0160</span>
@@ -91,7 +86,19 @@ export default function Footer({ setActiveTab }: any) {
         </div>
       </div>
       
-      <div className="max-w-7xl mx-auto mt-10 md:mt-16 pt-6 md:pt-8 border-t border-purple-500/10 text-center text-[10px] text-white/20 uppercase tracking-widest">
+      {/* القسم السفلي المستقل للسجل والضريبي */}
+      <div className="max-w-7xl mx-auto mt-10 md:mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-center items-center gap-6 md:gap-12 text-[11px] md:text-xs text-white/40">
+        <div className="flex items-center gap-2">
+            <FileText size={16} className="text-amber-500" />
+            <span>سجل تجاري: <strong className="font-mono text-white/70">1010439957</strong></span>
+        </div>
+        <div className="flex items-center gap-2">
+            <Receipt size={16} className="text-amber-500" />
+            <span>الرقم الضريبي: <strong className="font-mono text-white/70">314356943800003</strong></span>
+        </div>
+      </div>
+
+      <div className="max-w-7xl mx-auto mt-8 text-center text-[10px] text-white/20 uppercase tracking-widest">
         جميع الحقوق محفوظة © نوركاست 2026
       </div>
     </footer>

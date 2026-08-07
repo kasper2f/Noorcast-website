@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ShoppingCart, X } from 'lucide-react'; 
 import Loader from './Loader';
+import { getMagazine } from '../dbService';
 
 export default function MagazineGallery({ setActiveTab, initialCategory }: any) {
   const [images, setImages] = useState<any[]>([]);
@@ -10,13 +11,10 @@ export default function MagazineGallery({ setActiveTab, initialCategory }: any) 
   const [selectedImage, setSelectedImage] = useState<any>(null); // حالة لعرض الصورة البارزة (Lightbox)
 
   useEffect(() => {
-    const baseUrl = 'https://script.google.com/macros/s/AKfycbzlL0sfoWhBFXXoLd9ZiPu6boq9WvLlalu4_kf6DkXMdQtmf-XMM32Hxrq0TzFPga3K/exec';
-    const url = new URL(baseUrl);
-    url.searchParams.append('action', 'getMagazine');
-
-    fetch(url)
-      .then(res => res.json())
-      .then(data => {
+    const loadMagazineData = async () => {
+      setLoading(true);
+      try {
+        const data = await getMagazine();
         const loadedImages = Array.isArray(data) ? data : [];
         setImages(loadedImages);
         
@@ -24,10 +22,14 @@ export default function MagazineGallery({ setActiveTab, initialCategory }: any) 
         if (initialCategory) {
           setFilter(initialCategory);
         }
-        
+      } catch (err) {
+        console.error("Error loading magazine:", err);
+      } finally {
         setLoading(false);
-      })
-      .catch(err => { console.error("Error:", err); setLoading(false); });
+      }
+    };
+
+    loadMagazineData();
   }, [initialCategory]);
 
   // إبقاء أزرار الفلترة الأصلية في الواجهة كما هي تماماً (أثاث، أشخاص... إلخ) بناءً على الـ category الأساسي

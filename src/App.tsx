@@ -14,17 +14,26 @@ import AdminDashboard from './components/AdminDashboard';
 import Footer from './components/Footer';
 import ProjectDetailsPage from './components/ProjectDetailsPage'; 
 import ChatWidget from './components/ChatWidget';
+import { getServices, getPortfolio, getMagazine } from './dbService';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState('home');
   const [isAdmin, setIsAdmin] = useState(false);
   const [preselectedCategory, setPreselectedCategory] = useState<string | undefined>(undefined);
+  const [defaultStoreTab, setDefaultStoreTab] = useState<'packages' | 'services' | 'solutions'>('packages');
   const [selectedProject, setSelectedProject] = useState<any>(null); 
   const [sourceProject, setSourceProject] = useState<any>(null); 
   
   const [pendingServiceId, setPendingServiceId] = useState<string | null>(null);
 
-  // دعم الروابط المباشرة عبر الـ Hash (مثل #store أو #portfolio) وقراءة الخدمات المباشرة
+  // التحميل المسبق الصامت (Pre-fetching) للبيانات في الخلفية فور فتح الموقع لتوفير سرعة فائقة
+  useEffect(() => {
+    getServices().catch(() => {});
+    getPortfolio().catch(() => {});
+    getMagazine().catch(() => {}); // تم إضافة جلب المجلة مسبقاً لتكون فورية
+  }, []);
+
+  // دعم الروابط المباشرة عبر الـ Hash
   useEffect(() => {
     const handleHashRoute = () => {
       const hash = window.location.hash;
@@ -32,16 +41,23 @@ export default function App() {
       if (hash.startsWith('#service-')) {
         const id = hash.replace('#service-', '');
         setPendingServiceId(id);
+        setDefaultStoreTab('services');
         setActiveTab('store');
         window.scrollTo({ top: 0, behavior: 'smooth' });
         return;
       }
 
       const cleanHash = hash.replace('#', '').trim();
-      const validTabs = ['home', 'portfolio', 'magazine', 'store', 'tracker', 'partners', 'admin'];
+      const validTabs = ['home', 'portfolio', 'magazine', 'store', 'tracker', 'partners', 'admin', 'store-services'];
       
       if (validTabs.includes(cleanHash)) {
-        setActiveTab(cleanHash);
+        if (cleanHash === 'store-services') {
+          setActiveTab('store');
+          setDefaultStoreTab('services');
+        } else {
+          setActiveTab(cleanHash);
+          if (cleanHash === 'store') setDefaultStoreTab('packages');
+        }
         setSelectedProject(null);
       }
     };
@@ -56,16 +72,28 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeTab, selectedProject]);
 
-  // دالة لتغيير التبويب وتحديث مسار الـ Hash في المتصفح ليطابق الرابط المباشر
+  // دالة لتغيير التبويب وتحديث مسار الـ Hash في المتصفح
   const changeTabAndRoute = (tab: string) => {
-    setActiveTab(tab);
     setSelectedProject(null);
-    if (tab !== 'store') {
+    if (tab === 'store-services') {
+      setActiveTab('store');
+      setDefaultStoreTab('services');
       setPreselectedCategory(undefined);
       setSourceProject(null);
       setPendingServiceId(null);
+      window.location.hash = 'store-services';
+    } else {
+      setActiveTab(tab);
+      if (tab === 'store') {
+        setDefaultStoreTab('packages');
+      }
+      if (tab !== 'store') {
+        setPreselectedCategory(undefined);
+        setSourceProject(null);
+        setPendingServiceId(null);
+      }
+      window.location.hash = tab === 'home' ? '' : tab;
     }
-    window.location.hash = tab === 'home' ? '' : tab;
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -82,8 +110,10 @@ export default function App() {
     
     if (packageCategoriesList.includes(categoryName)) {
       setPreselectedCategory(categoryName);
+      setDefaultStoreTab('packages');
     } else {
       setPreselectedCategory(categoryName);
+      setDefaultStoreTab('services');
     }
 
     changeTabAndRoute('store');
@@ -98,6 +128,7 @@ export default function App() {
     });
     const targetCategory = item.subCategory || item.category;
     setPreselectedCategory(targetCategory);
+    setDefaultStoreTab('packages');
     changeTabAndRoute('store');
   };
 
@@ -119,6 +150,7 @@ export default function App() {
 
   const handleServiceClick = (serviceName: string) => {
     setPendingServiceId(serviceName);
+    setDefaultStoreTab('services');
     changeTabAndRoute('store');
     setSelectedProject(null);
   };
@@ -196,6 +228,8 @@ export default function App() {
                   sourceProject={sourceProject}
                   targetServiceId={pendingServiceId}
                   onClearTarget={() => setPendingServiceId(null)}
+                  setActiveTab={changeTabAndRoute}
+                  defaultTab={defaultStoreTab}
                 />
               )}
               

@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { getOrders, updateOrderStatus, getServices, addService, deleteService, updateService, getAdmins } from '../dbService';
-import { RefreshCw, MessageCircle, ShieldAlert, Plus, Trash2, Edit2, Search, Send, Menu, X } from 'lucide-react';
+import { RefreshCw, MessageCircle, ShieldAlert, Plus, Trash2, Edit2, Search, Send, Loader2 } from 'lucide-react';
 import { listenToChat, sendMessage } from '../services/chatService';
 import { ref, getDatabase, onValue, remove } from 'firebase/database';
 import { logActivity } from './logger';
@@ -9,6 +9,8 @@ export default function AdminDashboard() {
   const [orders, setOrders] = useState<any[]>([]);
   const [services, setServices] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
+  const [initialLoading, setInitialLoading] = useState(false); // مؤشر جلب البيانات عند أول دخول
+  const [isLoggingIn, setIsLoggingIn] = useState(false); // مؤشر جاري تسجيل الدخول
   const [activeTab, setActiveTab] = useState<'orders' | 'services' | 'chats'>('orders');
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   
@@ -22,9 +24,10 @@ export default function AdminDashboard() {
 
   const [newService, setNewService] = useState({ title: '', price: '', description: '', category: '', features: '', addons: '' });
   const [editingService, setEditingService] = useState<any>(null);
+  const [isSavingService, setIsSavingService] = useState(false); // مؤشر حفظ التعديلات
 
   const [chatUsers, setChatUsers] = useState<string[]>([]);
-  const [unreadChatsCount, setUnreadChatsCount] = useState(0); // عدد المحادثات غير المقروءة للتنبيه
+  const [unreadChatsCount, setUnreadChatsCount] = useState(0);
   const [activeChat, setActiveChat] = useState<string | null>(null);
   const [chatMessages, setChatMessages] = useState<any[]>([]);
   const [replyText, setReplyText] = useState('');
@@ -38,7 +41,7 @@ export default function AdminDashboard() {
 
   useEffect(() => {
     if (isAuthenticated) {
-      loadData();
+      loadData(true); // جلب البيانات الأولية مع إظهار شاشة التحظير
       const db = getDatabase();
       const chatsRef = ref(db, 'chats');
       return onValue(chatsRef, (snapshot) => {
@@ -47,7 +50,6 @@ export default function AdminDashboard() {
           const users = Object.keys(chatsData);
           setChatUsers(users);
 
-          // حساب المحادثات التي آخر رسالة فيها من العميل (غير مقروءة من الـ admin)
           let unreadCount = 0;
           users.forEach(user => {
             const userMessages = chatsData[user];
@@ -94,13 +96,22 @@ export default function AdminDashboard() {
     setServiceSearch('');
   };
 
-  const loadData = async () => {
+  const loadData = async (isInitial = false) => {
+    if (isInitial) setInitialLoading(true);
     setLoading(true);
-    const ordersData = await getOrders();
-    setOrders(ordersData || []);
-    const servicesData = await getServices(); 
-    setServices(servicesData || []);
-    setLoading(false);
+    try {
+      const [ordersData, servicesData] = await Promise.all([
+        getOrders(),
+        getServices()
+      ]);
+      setOrders(ordersData || []);
+      setServices(servicesData || []);
+    } catch (error) {
+      console.error("Error loading data:", error);
+    } finally {
+      setLoading(false);
+      if (isInitial) setInitialLoading(false);
+    }
   };
 
   const handleReply = () => {
@@ -111,11 +122,13 @@ export default function AdminDashboard() {
   };
 
   const getFilteredOrders = () => {
-    return orders.filter((o: any) => {
+    // تصفية الطلبات أولاً ثم عكس ترتيبها بحيث يكون الأحدث (آخر طلب) في الأعلى
+    const filtered = orders.filter((o: any) => {
       const matchesSearch = o.customerName?.toLowerCase().includes(searchTerm.toLowerCase()) || o.orderId?.toLowerCase().includes(searchTerm.toLowerCase());
       const matchesStatus = selectedStatus === 'الكل' || o.status === selectedStatus;
       return matchesSearch && matchesStatus;
     });
+    return [...filtered].reverse();
   };
 
   const getFilteredServices = () => {
@@ -132,7 +145,6 @@ export default function AdminDashboard() {
     
     await updateOrderStatus(orderId, newStatus);
     
-    // تسجيل العملية في Audit Log
     await logActivity({
       adminEmail: email,
       action: 'UPDATE_ORDER',
@@ -147,16 +159,18 @@ export default function AdminDashboard() {
     if (!newService.title || !newService.price) return alert('يرجى تعبئة العنوان والسعر');
     const formattedService = {
       ...newService,
-      features: newService.features.split(',').map((f: string) => f.trim()),
+      id: Date.now().toString(),
+      features: typeof newService.features === 'string' ? newService.features.split(',').map((f: string) => f.trim()) : newService.features,
       addons: newService.addons ? newService.addons.split(';').filter((i: string) => i.includes(':')).map((item: string) => ({
           id: Date.now().toString() + Math.random(),
           title: item.split(':')[0].trim(),
           price: Number(item.split(':')[1] || 0)
       })) : []
     };
+    
     await addService(formattedService);
+    setServices(prev => [formattedService, ...prev]); // تحديث فوري محلياً
 
-    // تسجيل العملية في Audit Log
     await logActivity({
       adminEmail: email,
       action: 'ADD_SERVICE',
@@ -171,8 +185,8 @@ export default function AdminDashboard() {
   const handleDeleteService = async (serviceId: string) => {
     const targetService = services.find((s: any) => s.id === serviceId);
     await deleteService(serviceId);
+    setServices(prev => prev.filter((s: any) => s.id !== serviceId)); // إزالة فورية محلياً
 
-    // تسجيل العملية في Audit Log
     await logActivity({
       adminEmail: email,
       action: 'DELETE_SERVICE',
@@ -184,27 +198,39 @@ export default function AdminDashboard() {
   };
 
   const handleUpdateService = async () => {
-    const updated = {
-        ...editingService,
-        features: typeof editingService.features === 'string' ? editingService.features.split(',').map((f: string) => f.trim()) : editingService.features,
-        addons: typeof editingService.addons === 'string' ? editingService.addons.split(';').filter((i: string) => i.includes(':')).map((item: string) => ({
-            id: Date.now().toString() + Math.random(),
-            title: item.split(':')[0].trim(),
-            price: Number(item.split(':')[1] || 0)
-        })) : editingService.addons
-    };
-    await updateService(updated);
+    if (!editingService) return;
+    setIsSavingService(true);
+    try {
+      const updated = {
+          ...editingService,
+          features: typeof editingService.features === 'string' ? editingService.features.split(',').map((f: string) => f.trim()) : editingService.features,
+          addons: typeof editingService.addons === 'string' ? editingService.addons.split(';').filter((i: string) => i.includes(':')).map((item: string) => ({
+              id: Date.now().toString() + Math.random(),
+              title: item.split(':')[0].trim(),
+              price: Number(item.split(':')[1] || 0)
+          })) : editingService.addons
+      };
+      
+      await updateService(updated);
+      
+      // تحديث القائمة محلياً فوراً لضمان ظهور التعديل دون الحاجة لإعادة تحميل كاملة
+      setServices(prev => prev.map((s: any) => s.id === updated.id ? updated : s));
 
-    // تسجيل العملية في Audit Log
-    await logActivity({
-      adminEmail: email,
-      action: 'UPDATE_SERVICE',
-      target: updated.title,
-      details: `Updated service details`
-    });
+      await logActivity({
+        adminEmail: email,
+        action: 'UPDATE_SERVICE',
+        target: updated.title,
+        details: `Updated service details & price to ${updated.price} SAR`
+      });
 
-    setEditingService(null);
-    loadData();
+      setEditingService(null);
+      loadData();
+    } catch (error) {
+      console.error("Error updating service:", error);
+      alert('حدث خطأ أثناء حفظ التعديلات، يرجى المحاولة مرة أخرى.');
+    } finally {
+      setIsSavingService(false);
+    }
   };
 
   if (!isAuthenticated) {
@@ -212,17 +238,19 @@ export default function AdminDashboard() {
       <div className="flex flex-col items-center justify-center min-h-screen bg-[#050505] text-white p-4">
         <div className="bg-[#121212] p-6 md:p-8 rounded-3xl border border-white/5 shadow-[0_0_30px_rgba(245,158,11,0.1)] w-full max-w-md">
           <div className="text-center mb-6 md:mb-8">
-            <div className="w-14 h-14 md:w-16 md:h-16 bg-amber-500/10 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/20">
+            <div className="w-14 h-14 md:w-16 md:h-16 bg-amber-500/15 rounded-full flex items-center justify-center mx-auto mb-4 border border-amber-500/25">
               <ShieldAlert className="text-amber-500" size={28} />
             </div>
             <h2 className="text-xl md:text-2xl font-bold mb-2">بوابة إدارة نوركاست</h2>
             <p className="text-amber-500/80 text-[11px] md:text-xs mt-2 px-2 italic border-t border-white/5 pt-4">تنبيه: جميع محاولات الدخول غير المصرح بها يتم تسجيلها ومراقبتها.</p>
           </div>
           <div className="space-y-3.5 md:space-y-4">
-            <input type="email" placeholder="البريد الإلكتروني" value={email} onChange={(e) => setEmail(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-xs md:text-sm outline-none focus:border-amber-500 text-white" />
-            <input type="password" placeholder="كلمة المرور" value={password} onChange={(e) => setPassword(e.target.value)} className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-xs md:text-sm outline-none focus:border-amber-500 text-white" />
+            <input type="email" placeholder="البريد الإلكتروني" value={email} onChange={(e) => setEmail(e.target.value)} disabled={isLoggingIn} className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-xs md:text-sm outline-none focus:border-amber-500 text-white" />
+            <input type="password" placeholder="كلمة المرور" value={password} onChange={(e) => setPassword(e.target.value)} disabled={isLoggingIn} className="w-full bg-black border border-white/10 rounded-xl px-4 py-3 text-xs md:text-sm outline-none focus:border-amber-500 text-white" />
             <button 
+              disabled={isLoggingIn}
               onClick={async () => { 
+                setIsLoggingIn(true);
                 try {
                   const admins = await getAdmins();
                   const matchedAdmin = admins.find((admin: any) => 
@@ -232,7 +260,6 @@ export default function AdminDashboard() {
 
                   if (matchedAdmin) {
                     setIsAuthenticated(true);
-                    // تسجيل دخول ناجح في الـ Audit Log
                     await logActivity({
                       adminEmail: email,
                       action: 'LOGIN_SUCCESS',
@@ -240,7 +267,6 @@ export default function AdminDashboard() {
                       details: 'Successful login'
                     });
                   } else {
-                    // تسجيل محاولة دخول فاشلة في الـ Audit Log
                     await logActivity({
                       adminEmail: email || 'unknown',
                       action: 'LOGIN_FAILED',
@@ -252,14 +278,33 @@ export default function AdminDashboard() {
                 } catch (error) {
                   console.error('Login error:', error);
                   alert('حدث خطأ أثناء التحقق من البيانات، يرجى المحاولة مرة أخرى.');
+                } finally {
+                  setIsLoggingIn(false);
                 }
               }} 
-              className="w-full bg-amber-500 text-black py-3 rounded-xl font-bold text-xs md:text-sm shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] transition-all"
+              className="w-full bg-amber-500 text-black py-3 rounded-xl font-bold text-xs md:text-sm shadow-[0_0_15px_rgba(245,158,11,0.3)] hover:shadow-[0_0_25px_rgba(245,158,11,0.5)] transition-all flex items-center justify-center gap-2"
             >
-              تسجيل الدخول
+              {isLoggingIn ? (
+                <>
+                  <Loader2 className="animate-spin" size={18} />
+                  <span>جاري تسجيل الدخول...</span>
+                </>
+              ) : (
+                'تسجيل الدخول'
+              )}
             </button>
           </div>
         </div>
+      </div>
+    );
+  }
+
+  // شاشة التحميل الأولية الذكية عند جلب البيانات
+  if (initialLoading) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[70vh] text-white">
+        <Loader2 className="animate-spin text-amber-500 mb-4" size={40} />
+        <p className="text-sm font-bold text-amber-500/90 animate-pulse">يرجى الانتظار، جاري تحميل البيانات...</p>
       </div>
     );
   }
@@ -271,7 +316,6 @@ export default function AdminDashboard() {
           <button onClick={() => setActiveTab('orders')} className={`text-base md:text-xl font-black whitespace-nowrap transition-colors ${activeTab === 'orders' ? 'text-amber-500' : 'text-white/40 hover:text-white'}`}>إدارة الطلبات</button>
           <button onClick={() => setActiveTab('services')} className={`text-base md:text-xl font-black whitespace-nowrap transition-colors ${activeTab === 'services' ? 'text-amber-500' : 'text-white/40 hover:text-white'}`}>إدارة الخدمات</button>
           
-          {/* تبويب المحادثات مع شارة التنبيه اللحظية */}
           <button 
             onClick={() => setActiveTab('chats')} 
             className={`text-base md:text-xl font-black whitespace-nowrap transition-colors relative flex items-center gap-2 ${activeTab === 'chats' ? 'text-amber-500' : 'text-white/40 hover:text-white'}`}
@@ -284,7 +328,7 @@ export default function AdminDashboard() {
             )}
           </button>
         </div>
-        <button onClick={loadData} className={`text-amber-500/70 hover:text-amber-500 transition-all self-end sm:self-auto ${loading ? 'animate-spin' : ''}`}><RefreshCw size={22} /></button>
+        <button onClick={() => loadData(false)} className={`text-amber-500/70 hover:text-amber-500 transition-all self-end sm:self-auto ${loading ? 'animate-spin' : ''}`}><RefreshCw size={22} /></button>
       </div>
 
       {activeTab === 'chats' ? (
@@ -536,8 +580,21 @@ export default function AdminDashboard() {
                 <input className="w-full bg-black p-3 rounded-xl border border-white/10 text-xs md:text-sm text-white outline-none focus:border-amber-500" value={editingService.features} onChange={(e) => setEditingService({...editingService, features: e.target.value})} placeholder="الميزات (بفواصل)" />
                 <input className="w-full bg-black p-3 rounded-xl border border-white/10 text-xs md:text-sm text-white outline-none focus:border-amber-500" value={editingService.addons} onChange={(e) => setEditingService({...editingService, addons: e.target.value})} placeholder="إضافات (العنوان:السعر;العنوان:السعر)" />
                 <div className="flex gap-3 pt-4 border-t border-white/10">
-                  <button onClick={handleUpdateService} className="flex-1 bg-amber-500 text-black py-3 rounded-xl font-bold text-xs md:text-sm shadow-[0_0_15px_rgba(245,158,11,0.4)] hover:shadow-[0_0_25px_rgba(245,158,11,0.6)] transition-all">حفظ التغييرات</button>
-                  <button onClick={() => setEditingService(null)} className="flex-1 bg-white/5 text-white py-3 rounded-xl font-bold text-xs md:text-sm hover:bg-white/10 transition-all">إلغاء</button>
+                  <button 
+                    disabled={isSavingService}
+                    onClick={handleUpdateService} 
+                    className="flex-1 bg-amber-500 text-black py-3 rounded-xl font-bold text-xs md:text-sm shadow-[0_0_15px_rgba(245,158,11,0.4)] hover:shadow-[0_0_25px_rgba(245,158,11,0.6)] transition-all flex items-center justify-center gap-2"
+                  >
+                    {isSavingService ? (
+                      <>
+                        <Loader2 className="animate-spin" size={16} />
+                        <span>جاري حفظ التعديلات...</span>
+                      </>
+                    ) : (
+                      'حفظ التغييرات'
+                    )}
+                  </button>
+                  <button disabled={isSavingService} onClick={() => setEditingService(null)} className="flex-1 bg-white/5 text-white py-3 rounded-xl font-bold text-xs md:text-sm hover:bg-white/10 transition-all">إلغاء</button>
                 </div>
               </div>
             </div>
