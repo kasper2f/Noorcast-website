@@ -33,8 +33,7 @@ export default function Footer({ setActiveTab }: any) {
             <h3 className="text-lg md:text-xl font-black text-white tracking-wide">نوركاست</h3>
           </div>
           <p className="text-white/50 text-xs md:text-sm leading-relaxed max-w-xs">
-            مؤسستنا متخصصة في تقديم حلول إنتاج فني متكامل وصناعة محتوى ترويجي وسينمائي وتطوير حسابات السوشل ميديا للشركات والعلامات التجارية الرائدة لمضاعفة النمو والوصول الرقمي.
-          </p>
+نوركاست شركة إبداعية سعودية تقدم حلولًا متكاملة في صناعة المحتوى والإنتاج المرئي والتصوير وإدارة منصات التواصل الاجتماعي والتصميم وحلول الذكاء الاصطناعي للعلامات التجارية والأفراد.          </p>
           <div className="flex gap-3">
             <a href="https://wa.me/966541550160" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 hover:bg-emerald-500 hover:text-black cursor-pointer transition-all duration-300 text-white/40">
               <FaWhatsapp size={16} />
