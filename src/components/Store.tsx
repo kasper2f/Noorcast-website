@@ -1,32 +1,32 @@
 import React, { useEffect, useState } from 'react';
-import { CheckCircle, ShieldCheck, Search, PlusCircle, MinusCircle, Sparkles, Tag, LayoutDashboard, ShoppingCart, X, Eye } from 'lucide-react';
+import { CheckCircle, ShieldCheck, Search, PlusCircle, MinusCircle, Sparkles, Tag, ShoppingCart, X, Eye } from 'lucide-react';
 import BookingModal from './BookingModal';
-import CustomBundleBuilder from './CustomBundleBuilder';
 import Loader from './Loader';
 import { getServices, getCoupons } from '../dbService';
-import { businessSolutions, packageCategories } from '../Data/data';
-import { BUNDLE_CATEGORIES } from '../Data/bundleConfig';
+import { packageCategories } from '../Data/data';
 
 export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimilar, sourceProject, targetServiceId, onClearTarget, setActiveTab, defaultTab }: any) {
-  // قائمة أقسام الباقات الجاهزة الرئيسية للتحقق الذكي
-  const packageCategoryNames = ['إدارة المحتوى', 'المتاجر الإلكترونية', 'المواقع الإلكترونية', 'الهوية البصرية', 'التصوير الشهري'];
+  // قائمة أقسام الباقات الجاهزة المتبقية 
+  const packageCategoryNames = ['إدارة المحتوى'];
 
-  const [activeTab, setActiveTabStore] = useState<'packages' | 'services' | 'solutions'>(
-    defaultTab || (preselectedCategory && packageCategoryNames.includes(preselectedCategory) ? 'packages' : 'packages')
+  const [activeTabStore, setActiveTabStore] = useState<'packages' | 'services'>(
+    (defaultTab === 'services' || (!packageCategoryNames.includes(preselectedCategory) && preselectedCategory)) ? 'services' : 'packages'
   );
 
   useEffect(() => {
-    if (defaultTab) {
+    if (defaultTab === 'services' || defaultTab === 'packages') {
       setActiveTabStore(defaultTab);
     }
   }, [defaultTab]);
 
-  const [activePackageCat, setActivePackageCat] = useState('cat2');
+  // تعيين "إدارة المحتوى" كقسم افتراضي 
+  const contentCategoryId = packageCategories.find((c: any) => c.name === 'إدارة المحتوى')?.id || 'cat2';
+  const [activePackageCat, setActivePackageCat] = useState(contentCategoryId);
+  
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [activeBundleType, setActiveBundleType] = useState<keyof typeof BUNDLE_CATEGORIES | null>(null);
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const [isMobileCartOpen, setIsMobileCartOpen] = useState(false); // حالة فتح عربة الجوال العائمة
+  const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
   
   const [selectedAddons, setSelectedAddons] = useState<Record<string, Record<string, number>>>({});
   const [searchQuery, setSearchQuery] = useState('');
@@ -85,14 +85,12 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
     loadServices();
   }, []);
 
-  // إصلاح جذري لضمان عمل التوجيه والبحث عن الخدمة بدقة فائقة على الجوال واللابتوب معاً
   useEffect(() => {
     if (targetServiceId && !isLoading && ourServices.length > 0) {
       setActiveTabStore('services');
-      setSearchQuery(''); // مسح أي بحث قديم لضمان ظهور الخدمة المستهدفة
+      setSearchQuery(''); 
       setSelectedCategory('الكل');
 
-      // البحث عن الخدمة بالاسم المطابق تماماً أو الاحتواء (مع إزالة المسافات الزائدة وحالة الأحرف)
       const cleanTarget = targetServiceId.trim().toLowerCase();
       const targetService = ourServices.find((s: any) => {
         const title = (s.title || '').trim().toLowerCase();
@@ -100,7 +98,6 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
       });
 
       if (targetService) {
-        // وقت انتظار أطول قليلاً للجوال لضمان اكتمال رسم عناصر الـ DOM بعد تغيير التبويب
         const timer = setTimeout(() => {
           const element = document.getElementById(`service-${targetService.id}`);
           if (element) {
@@ -118,7 +115,6 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
     }
   }, [targetServiceId, isLoading, ourServices, onClearTarget]);
 
-  // دالة ذكية لتوجيه زر استعراض الأعمال مع الاعتماد الحرفي على الـ subCategory إن وجد أو عنوان الخدمة
   const handleViewMagazine = (serviceItem: any) => {
     if (onOrderSimilar) {
       const targetQuery = serviceItem.subCategory || serviceItem.title;
@@ -196,15 +192,11 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
         couponCode: appliedCoupon ? appliedCoupon.Code : 'لا يوجد',
         discountAmount: appliedCoupon ? (total - finalTotal).toFixed(2) + ' ر.س' : '0 ر.س'
     }); 
-    setIsMobileCartOpen(false); // إغلاق عربة الجوال عند الحجز
+    setIsMobileCartOpen(false); 
     setIsModalOpen(true); 
   };
 
-  const sortedPackageCategories = [...packageCategories].sort((a: any, b: any) => {
-    const order = ['إدارة المحتوى', 'المتاجر الإلكترونية', 'المواقع الإلكترونية', 'الهوية البصرية', 'التصوير الشهري'];
-    return order.indexOf(a.name) - order.indexOf(b.name);
-  });
-
+  const filteredPackageCategories = [...packageCategories].filter((cat: any) => cat.name === 'إدارة المحتوى');
   const activeServicesCount = ourServices.reduce((acc: number, s: any) => acc + (s.count > 0 ? 1 : 0), 0);
 
   return (
@@ -214,15 +206,16 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
         <ShieldCheck size={18} className="shrink-0" /> <span>جميع الخدمات آمنة ولا تتطلب دفع مسبق عبر الموقع</span>
       </div>
       
+      {/* تم إبقاء خيارين فقط: الباقات الجاهزة وخدماتنا */}
       <div className="flex justify-start md:justify-center gap-2 md:gap-4 mb-8 md:mb-16 overflow-x-auto pb-2 scrollbar-none">
-        {['packages', 'solutions', 'services'].map((tab) => (
-          <button key={tab} onClick={() => { setActiveTabStore(tab as any); setSearchQuery(''); setSelectedCategory('الكل'); }} className={`px-4 md:px-6 py-2.5 md:py-3 rounded-full text-xs md:text-sm font-bold whitespace-nowrap transition-all ${activeTab === tab ? 'bg-amber-500 text-black' : 'bg-[#121212] text-white border border-white/5'}`}>
-            {tab === 'packages' ? 'الباقات الجاهزة' : tab === 'solutions' ? 'حلول الأعمال' : 'خدماتنا'}
+        {['packages', 'services'].map((tab) => (
+          <button key={tab} onClick={() => { setActiveTabStore(tab as any); setSearchQuery(''); setSelectedCategory('الكل'); }} className={`px-4 md:px-6 py-2.5 md:py-3 rounded-full text-xs md:text-sm font-bold whitespace-nowrap transition-all ${activeTabStore === tab ? 'bg-amber-500 text-black' : 'bg-[#121212] text-white border border-white/5'}`}>
+            {tab === 'packages' ? 'الباقات الجاهزة' : 'خدماتنا'}
           </button>
         ))}
       </div>
 
-      {activeTab === 'services' && (
+      {activeTabStore === 'services' && (
         <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-8 md:mb-12">
           <div className="flex-1 relative">
             <Search className="absolute right-3 top-3.5 text-white/30" size={18} />
@@ -236,77 +229,11 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
         </div>
       )}
 
-      {activeTab === 'solutions' ? (
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-          {businessSolutions.map((sol: any) => (
-            <div key={sol.id} className="bg-[#121212] p-5 md:p-8 rounded-3xl border border-white/10 flex flex-col hover:border-amber-500 transition-all justify-between">
-              <div>
-                <h3 className="text-base md:text-xl font-black mb-2 text-white">{sol.name}</h3>
-                <div className="text-xl md:text-3xl font-black text-amber-500 mb-4">{sol.price.toLocaleString()} ر.س</div>
-                
-                {sol.suitableFor && (
-                  <div className="mb-4 bg-white/5 p-3 rounded-xl border border-white/5">
-                    <span className="text-[10px] text-amber-500 font-bold block mb-1 uppercase tracking-wider">مناسب لـ:</span>
-                    <p className="text-white/70 text-xs leading-relaxed">{sol.suitableFor}</p>
-                  </div>
-                )}
-
-                <div className="mb-5">
-                  <span className="text-xs font-bold text-white block mb-2 border-b border-white/10 pb-2">هذه الخدمة تشمل</span>
-                  <ul className="text-white/70 text-xs space-y-2 flex-grow">
-                    {sol.features.map((f: string, i: number) => (
-                      <li key={i} className="flex items-start gap-2 leading-relaxed">
-                        <CheckCircle size={14} className="text-amber-500 shrink-0 mt-0.5" /> 
-                        <span>{f}</span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-
-                {sol.duration && (
-                  <div className="mb-5 pt-3 border-t border-white/5 flex justify-between items-center text-xs">
-                    <span className="text-white/40">مدة التنفيذ:</span>
-                    <span className="font-bold text-amber-500">{sol.duration}</span>
-                  </div>
-                )}
-              </div>
-
-              <div className="space-y-2">
-                <button onClick={() => openBooking({ title: sol.name, price: sol.price.toLocaleString() + ' ر.س' })} className="w-full bg-white text-black py-3 rounded-xl font-black hover:bg-amber-500 transition-all shadow-md text-xs md:text-sm">
-                  طلب هذا الحل
-                </button>
-                <button onClick={() => handleViewMagazine(sol)} className="w-full bg-white/5 text-amber-500 py-2.5 rounded-xl font-bold hover:bg-white/10 transition-all text-xs flex items-center justify-center gap-1.5 border border-white/5">
-                  <Eye size={14} /> استعرض أعمال هذا الحل
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : activeTab === 'packages' ? (
+      {activeTabStore === 'packages' ? (
         <>
-          <div className="flex justify-start md:justify-center gap-2 mb-8 md:mb-12 overflow-x-auto pb-2 scrollbar-none">
-            {sortedPackageCategories.map((cat: any) => (
-              <button key={cat.id} onClick={() => setActivePackageCat(cat.id)} className={`px-4 py-2 md:px-5 md:py-2 rounded-lg text-xs md:text-sm font-bold whitespace-nowrap transition-all ${activePackageCat === cat.id ? 'bg-white text-black' : 'bg-[#121212] text-white border border-white/10'}`}>
-                {cat.name}
-              </button>
-            ))}
-          </div>
-          <div className="text-center mb-8 md:mb-10">
-              <button 
-                onClick={() => {
-                  const currentCategory = sortedPackageCategories.find((c: any) => c.id === activePackageCat);
-                  if (currentCategory && currentCategory.bundleKey) {
-                    setActiveBundleType(currentCategory.bundleKey as keyof typeof BUNDLE_CATEGORIES);
-                  }
-                }}
-                className="text-amber-500 text-xs md:text-sm font-bold border border-amber-500/30 px-5 md:px-6 py-2.5 rounded-full hover:bg-amber-500 hover:text-black transition-all inline-flex items-center gap-2"
-              >
-                <LayoutDashboard size={16} /> صمم باقتك الخاصة لهذا القسم
-              </button>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
-            {sortedPackageCategories.find((c: any) => c.id === activePackageCat)?.packages.map((pkg: any) => {
-              const currentCatName = sortedPackageCategories.find((c: any) => c.id === activePackageCat)?.name;
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8 mt-6">
+            {filteredPackageCategories.find((c: any) => c.id === activePackageCat)?.packages.map((pkg: any) => {
+              const currentCatName = filteredPackageCategories.find((c: any) => c.id === activePackageCat)?.name;
               return (
                 <div key={pkg.id} className="bg-[#121212] p-5 md:p-8 rounded-3xl border border-white/5 flex flex-col hover:border-amber-500 transition-all justify-between">
                   <div>
@@ -345,7 +272,6 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
                   <p className="text-white/50 text-[10px] sm:text-xs md:text-sm mb-3 leading-relaxed w-full">{s.description}</p>
                   <div className="border-t border-white/10 my-2 md:my-3 w-full"></div>
                   
-                  {/* زر استعراض أعمال هذه الخدمة يعتمد على الـ subCategory بالحرف أو عنوان الخدمة */}
                   <button onClick={() => handleViewMagazine(s)} className="text-[9px] sm:text-[11px] text-amber-500 font-bold mb-3 hover:underline text-right block truncate w-full">
                     استعرض أعمال هذه الخدمة
                   </button>
@@ -500,13 +426,6 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
       )}
 
       <BookingModal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} selectedPackage={selectedPackage} customServices={ourServices} selectedAddons={selectedAddons} />
-      {activeBundleType && (
-        <CustomBundleBuilder 
-          isOpen={activeBundleType !== null} 
-          onClose={() => setActiveBundleType(null)} 
-          categoryType={activeBundleType} 
-        />
-      )}
     </section>
   );
 }
