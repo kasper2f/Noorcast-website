@@ -6,7 +6,6 @@ import { getServices, getCoupons } from '../dbService';
 import { packageCategories } from '../Data/data';
 
 export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimilar, sourceProject, targetServiceId, onClearTarget, setActiveTab, defaultTab }: any) {
-  // قائمة أقسام الباقات الجاهزة المتبقية 
   const packageCategoryNames = ['إدارة المحتوى'];
 
   const [activeTabStore, setActiveTabStore] = useState<'packages' | 'services'>(
@@ -19,7 +18,6 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
     }
   }, [defaultTab]);
 
-  // تعيين "إدارة المحتوى" كقسم افتراضي 
   const contentCategoryId = packageCategories.find((c: any) => c.name === 'إدارة المحتوى')?.id || 'cat2';
   const [activePackageCat, setActivePackageCat] = useState(contentCategoryId);
   
@@ -27,6 +25,9 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
   const [selectedPackage, setSelectedPackage] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
+  
+  // حالة تتبع التركيز على مربع البحث لتمدده بشكل ديناميكي
+  const [isSearchFocused, setIsSearchFocused] = useState(false);
   
   const [selectedAddons, setSelectedAddons] = useState<Record<string, Record<string, number>>>({});
   const [searchQuery, setSearchQuery] = useState('');
@@ -206,7 +207,6 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
         <ShieldCheck size={18} className="shrink-0" /> <span>جميع الخدمات آمنة ولا تتطلب دفع مسبق عبر الموقع</span>
       </div>
       
-      {/* تم إبقاء خيارين فقط: الباقات الجاهزة وخدماتنا */}
       <div className="flex justify-start md:justify-center gap-2 md:gap-4 mb-8 md:mb-16 overflow-x-auto pb-2 scrollbar-none">
         {['packages', 'services'].map((tab) => (
           <button key={tab} onClick={() => { setActiveTabStore(tab as any); setSearchQuery(''); setSelectedCategory('الكل'); }} className={`px-4 md:px-6 py-2.5 md:py-3 rounded-full text-xs md:text-sm font-bold whitespace-nowrap transition-all ${activeTabStore === tab ? 'bg-amber-500 text-black' : 'bg-[#121212] text-white border border-white/5'}`}>
@@ -216,15 +216,33 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
       </div>
 
       {activeTabStore === 'services' && (
-        <div className="flex flex-col md:flex-row gap-3 md:gap-4 mb-8 md:mb-12">
-          <div className="flex-1 relative">
-            <Search className="absolute right-3 top-3.5 text-white/30" size={18} />
-            <input placeholder="ابحث عن خدمة..." onChange={(e) => setSearchQuery(e.target.value)} value={searchQuery} className="w-full bg-[#121212] border border-white/10 rounded-xl p-3 pr-10 text-xs md:text-sm text-white outline-none focus:border-amber-500 transition-all" />
+        <div className="flex flex-col md:flex-row gap-4 mb-8 md:mb-12 items-start md:items-center">
+          {/* مربع البحث التفاعلي - يتمدد عند الضغط عليه */}
+          <div className={`relative transition-all duration-500 ease-in-out shrink-0 ${isSearchFocused ? 'w-full md:w-1/2' : 'w-full md:w-64'}`}>
+            <Search className={`absolute right-3 top-3.5 transition-colors duration-300 ${isSearchFocused ? 'text-amber-500' : 'text-white/30'}`} size={18} />
+            <input 
+              placeholder="ابحث عن خدمة..." 
+              onChange={(e) => setSearchQuery(e.target.value)} 
+              value={searchQuery} 
+              onFocus={() => setIsSearchFocused(true)}
+              onBlur={() => setIsSearchFocused(false)}
+              className="w-full bg-[#121212] border border-white/10 rounded-xl p-3 pr-10 text-xs md:text-sm text-white outline-none focus:border-amber-500 focus:shadow-[0_0_15px_rgba(245,158,11,0.1)] transition-all" 
+            />
           </div>
-          <div className="flex gap-2 overflow-x-auto pb-2 md:pb-0 scrollbar-none">
-            {categories.map((cat: any) => (
-              <button key={cat} onClick={() => { setSelectedCategory(cat); setSearchQuery(''); }} className={`px-3.5 md:px-4 py-2.5 md:py-3 rounded-xl text-xs whitespace-nowrap border transition-all ${selectedCategory === cat ? 'bg-amber-500 text-black border-amber-500' : 'bg-[#121212] text-white border-white/5 hover:border-amber-500'}`}>{cat}</button>
-            ))}
+          
+          {/* شريط الفلاتر القابل للسحب أفقياً بشريط تمرير مخصص */}
+          <div className="flex-1 w-full overflow-hidden">
+            <div className="flex gap-2 overflow-x-auto pb-3 flex-nowrap scroll-smooth [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-[#121212] [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-amber-500/30 hover:[&::-webkit-scrollbar-thumb]:bg-amber-500 [&::-webkit-scrollbar-thumb]:rounded-full transition-all">
+              {categories.map((cat: any) => (
+                <button 
+                  key={cat} 
+                  onClick={() => { setSelectedCategory(cat); setSearchQuery(''); }} 
+                  className={`px-4 py-2.5 rounded-xl text-xs whitespace-nowrap border transition-all ${selectedCategory === cat ? 'bg-amber-500 text-black border-amber-500 shadow-md' : 'bg-[#121212] text-white border-white/5 hover:border-amber-500/50'}`}
+                >
+                  {cat}
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       )}
