@@ -30,17 +30,26 @@ export default function Header({ activeTab, setActiveTab }: any) {
     setMobileMenuOpen(false);
   };
 
-  // دالة تغيير اللغة المعدلة لتعمل بشكل قاطع
+  // دالة تغيير اللغة المعدلة لتعمل على السيرفر الحي (الإنترنت) دون تعليق
   const switchLanguage = (langCode: string) => {
+    const domain = window.location.hostname;
+    
     if (langCode === 'en') {
-      // تفعيل الإنجليزية
-      document.cookie = "googtrans=/ar/en; path=/";
+      // تفعيل الإنجليزية محلياً وعلى الدومين
+      document.cookie = `googtrans=/ar/en; path=/`;
+      document.cookie = `googtrans=/ar/en; domain=.${domain}; path=/`;
     } else {
-      // تفريغ الكوكيز للعودة للعربية بشكل نظيف
-      document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
-      document.cookie = "googtrans=/ar/en; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+      // إجبار جوجل على العودة للعربية
+      document.cookie = `googtrans=/ar/ar; path=/`;
+      document.cookie = `googtrans=/ar/ar; domain=.${domain}; path=/`;
+      
+      // التدمير الشامل لكوكيز الإنجليزية السابقة لضمان عدم التعليق
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+      document.cookie = `googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.${domain}; path=/`;
+      document.cookie = `googtrans=/ar/en; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/`;
+      document.cookie = `googtrans=/ar/en; expires=Thu, 01 Jan 1970 00:00:00 UTC; domain=.${domain}; path=/`;
     }
-    // إعادة تحميل الصفحة لتطبيق الترجمة والاتجاه الجديد
+    
     window.location.reload();
   };
 
