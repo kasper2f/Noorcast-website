@@ -33,14 +33,15 @@ export default function Hero({ setActiveTab, setSelectedCategory }: any) {
 
   return (
     <section className="bg-[#0A0A0B] py-10 md:py-16 px-4 md:px-6 overflow-hidden">
-      <div className="max-w-[1200px] mx-auto grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 items-start">
+      {/* استخدام flex-row بدلاً من grid لضمان انقلاب الصناديق يميناً ويساراً تلقائياً */}
+      <div className="max-w-[1200px] mx-auto flex flex-col md:flex-row gap-8 md:gap-12 items-stretch">
         
-        {/* البطاقة النصية (اليمين) */}
+        {/* البطاقة النصية (ستكون يمين في العربي ويسار في الإنجليزي) */}
         <motion.div 
-          initial={{ opacity: 0, x: -30 }}
-          animate={{ opacity: 1, x: 0 }}
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.8 }}
-          className="bg-[#121212] p-6 sm:p-8 md:p-10 rounded-3xl border border-white/5 shadow-[0_0_20px_rgba(245,158,11,0.1)] hover:border-amber-500/30 transition-all duration-500 flex flex-col justify-between min-h-[400px] md:min-h-[450px]"
+          className="w-full md:w-1/2 bg-[#121212] p-6 sm:p-8 md:p-10 rounded-3xl border border-white/5 shadow-[0_0_20px_rgba(245,158,11,0.1)] hover:border-amber-500/30 transition-all duration-500 flex flex-col justify-between min-h-[400px] md:min-h-[450px] text-start"
         >
           <div>
             <span className="text-amber-500 font-bold tracking-[0.2em] text-[9px] md:text-[10px] uppercase mb-3 md:mb-4 block">#نصنع_المستقبل_البصري</span>
@@ -61,7 +62,7 @@ export default function Hero({ setActiveTab, setSelectedCategory }: any) {
                 { title: '🟡 تنفيذ بإحترافية', desc: 'جودة في التنفيذ، والتزام بالمواعيد، وتجربة عمل واضحة.' },
                 { title: '🟡 شاهد الأعمال أولاً', desc: 'شاهد الجودة قبل اتخاذ قرار الشراء.' }
               ].map((box, i) => (
-                <div key={i} className="bg-black/40 p-3.5 rounded-2xl border border-white/5 hover:border-amber-500/40 transition-all duration-300 flex flex-col justify-center">
+                <div key={i} className="bg-black/40 p-3.5 rounded-2xl border border-white/5 hover:border-amber-500/40 transition-all duration-300 flex flex-col justify-center text-start">
                   <span className="text-xs sm:text-sm font-bold text-white mb-1 block">{box.title}</span>
                   <span className="text-[11px] sm:text-xs text-white/60 leading-relaxed">{box.desc}</span>
                 </div>
@@ -77,16 +78,18 @@ export default function Hero({ setActiveTab, setSelectedCategory }: any) {
             >
               زور المتجر مباشرة
             </button>
-            <button onClick={() => setActiveTab('portfolio')} className="text-white text-xs md:text-sm font-bold hover:text-amber-500 transition-colors">معرض الأعمال ←</button>
+            <button onClick={() => setActiveTab('portfolio')} className="text-white text-xs md:text-sm font-bold hover:text-amber-500 transition-colors flex items-center gap-2">
+              معرض الأعمال <span className="rtl:rotate-0 ltr:rotate-180 transition-transform">←</span>
+            </button>
           </div>
         </motion.div>
 
-        {/* بطاقة الفيديو (اليسار) */}
+        {/* بطاقة الفيديو (ستكون يسار في العربي ويمين في الإنجليزي) */}
         <motion.div 
-          initial={{ opacity: 0, x: 30 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.8 }}
-          className="bg-[#121212] p-6 md:p-8 rounded-3xl border border-white/5 shadow-[0_0_20px_rgba(245,158,11,0.1)] hover:border-amber-500/30 transition-all duration-500 min-h-[380px] md:min-h-[450px] flex flex-col justify-between"
+          initial={{ opacity: 0, y: 30 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.8, delay: 0.2 }}
+          className="w-full md:w-1/2 bg-[#121212] p-6 md:p-8 rounded-3xl border border-white/5 shadow-[0_0_20px_rgba(245,158,11,0.1)] hover:border-amber-500/30 transition-all duration-500 min-h-[380px] md:min-h-[450px] flex flex-col justify-between"
         >
           <div className="mb-4 md:mb-6 flex-grow relative overflow-hidden rounded-2xl transition-opacity duration-500 aspect-video md:aspect-auto">
             <motion.div

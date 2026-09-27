@@ -1,25 +1,49 @@
-import React, { useState } from 'react';
-import { LayoutGrid, Briefcase, Users, Package, Search, Camera, Menu, X, Mail } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { LayoutGrid, Briefcase, Users, Package, Search, Camera, Menu, X, Mail, Globe } from 'lucide-react';
 
 export default function Header({ activeTab, setActiveTab }: any) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [logoClicks, setLogoClicks] = useState(0);
+  const [currentLang, setCurrentLang] = useState('ar');
+
+  // قراءة اللغة وتغيير اتجاه الموقع بالكامل (RTL / LTR)
+  useEffect(() => {
+    const isEnglish = document.cookie.includes('googtrans=/ar/en');
+    setCurrentLang(isEnglish ? 'en' : 'ar');
+    
+    // هذا السطر هو السحر الذي يقلب الموقع لليسار عند اختيار الإنجليزي
+    document.documentElement.dir = isEnglish ? 'ltr' : 'rtl';
+    document.documentElement.lang = isEnglish ? 'en' : 'ar';
+  }, []);
 
   const menuItems = [
-    { name: 'الرئيسية', tab: 'home', icon: <LayoutGrid size={18} /> },
-    { name: 'معرض أعمالنا', tab: 'portfolio', icon: <Briefcase size={18} /> },
-    { name: 'المجلة الفنية', tab: 'magazine', icon: <Camera size={18} /> },
-    { name: 'المتجر والخدمات', tab: 'store', icon: <Package size={18} /> },
-    { name: 'شركاء النجاح', tab: 'partners', icon: <Users size={18} /> },
-    { name: 'تتبع طلبك', tab: 'tracker', icon: <Search size={18} /> },
+    { name: 'الرئيسية', tab: 'home', icon: <LayoutGrid size={16} /> },
+    { name: 'معرض أعمالنا', tab: 'portfolio', icon: <Briefcase size={16} /> },
+    { name: 'المجلة الفنية', tab: 'magazine', icon: <Camera size={16} /> },
+    { name: 'المتجر والخدمات', tab: 'store', icon: <Package size={16} /> },
+    { name: 'شركاء النجاح', tab: 'partners', icon: <Users size={16} /> },
+    { name: 'تتبع طلبك', tab: 'tracker', icon: <Search size={16} /> },
   ];
 
   const handleTabClick = (tab: string) => {
     setActiveTab(tab);
-    setMobileMenuOpen(false); // إغلاق القائمة تلقائياً عند الضغط على أي خيار في الجوال
+    setMobileMenuOpen(false);
   };
 
-  // دالة التمرير المباشر نحو أسفل الصفحة (الفوتر) عند الضغط على "تواصل معنا"
+  // دالة تغيير اللغة المعدلة لتعمل بشكل قاطع
+  const switchLanguage = (langCode: string) => {
+    if (langCode === 'en') {
+      // تفعيل الإنجليزية
+      document.cookie = "googtrans=/ar/en; path=/";
+    } else {
+      // تفريغ الكوكيز للعودة للعربية بشكل نظيف
+      document.cookie = "googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+      document.cookie = "googtrans=/ar/en; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+    }
+    // إعادة تحميل الصفحة لتطبيق الترجمة والاتجاه الجديد
+    window.location.reload();
+  };
+
   const scrollToFooter = () => {
     setMobileMenuOpen(false);
     window.scrollTo({
@@ -28,13 +52,12 @@ export default function Header({ activeTab, setActiveTab }: any) {
     });
   };
 
-  // دالة الضغط السري على الشعار (3 ضغطات متتالية تفتح لوحة الإدارة)
   const handleLogoClick = () => {
     setLogoClicks(prev => {
       const newCount = prev + 1;
       if (newCount === 3) {
         setActiveTab('admin');
-        return 0; // إعادة تعيين العداد
+        return 0;
       }
       setTimeout(() => setLogoClicks(0), 1000);
       return newCount;
@@ -46,15 +69,14 @@ export default function Header({ activeTab, setActiveTab }: any) {
 
   return (
     <header className="sticky top-0 z-50 bg-[#0A0A0B] border-b border-white/10 px-4 md:px-6 py-3">
-      <div className="max-w-[1400px] mx-auto flex items-center justify-between">
+      <div className="max-w-[1400px] mx-auto flex items-center justify-between gap-2 md:gap-4">
         
-        {/* الشعار مع ميزة الضغط السري (3 مرات) بدون إشعارات */}
         <div 
-          className="flex items-center cursor-pointer hover:opacity-80 transition-opacity relative" 
+          className="flex items-center cursor-pointer hover:opacity-80 transition-opacity relative shrink-0" 
           onClick={handleLogoClick}
           title="NoorCast"
         >
-          <div className="w-16 h-14 md:w-20 md:h-18 flex items-center justify-center -ml-2 md:-ml-3 relative"> 
+          <div className="w-14 h-12 md:w-16 md:h-14 flex items-center justify-center -ml-2 relative shrink-0"> 
             <img 
               src="https://res.cloudinary.com/dfwfh4xzb/image/upload/v1782727817/WhatsApp_Image_2026-06-21_at_12.56.07_AM_dhzswc.png" 
               alt="Noorcast Logo" 
@@ -62,65 +84,71 @@ export default function Header({ activeTab, setActiveTab }: any) {
             />
           </div>
 
-          <div className="text-right">
-            <h1 className="text-xl md:text-[28px] font-bold text-white leading-tight">NoorCast</h1>
-            <span className="text-[7px] md:text-[8px] text-purple-400 tracking-[0.2em] uppercase font-black block">Creative Solutions</span>
+          <div className={`whitespace-nowrap ${currentLang === 'en' ? 'ml-2 text-left' : 'text-right'}`}>
+            <h1 className="text-lg md:text-[24px] lg:text-[28px] font-bold text-white leading-tight">NoorCast</h1>
+            <span className="text-[6px] md:text-[7px] text-purple-400 tracking-[0.2em] uppercase font-black block">Creative Solutions</span>
           </div>
         </div>
 
-        {/* القائمة (تظهر في اللابتوب فقط وتختفي في الجوال) */}
-        <nav className="hidden lg:flex items-center gap-2 xl:gap-4">
+        <nav className="hidden lg:flex items-center justify-center flex-1 gap-1 xl:gap-3">
           {menuItems.map((item) => (
             <button
               key={item.tab}
               onClick={() => handleTabClick(item.tab)}
-              className={`flex items-center gap-2 text-sm font-bold transition-all px-3 py-2 rounded-xl ${
+              className={`flex items-center gap-1.5 text-xs xl:text-sm font-bold transition-all px-2.5 py-2 rounded-xl whitespace-nowrap ${
                 activeTab === item.tab 
                   ? 'bg-purple-600 text-white' 
                   : 'text-white/70 hover:text-white hover:bg-white/5'
               }`}
             >
-              {item.icon} {item.name}
+              <span className="shrink-0">{item.icon}</span> {item.name}
             </button>
           ))}
         </nav>
 
-        {/* جهة اليسار (أزرار تواصل معنا واطلب باقتك وإظهار زر القائمة في الجوال) */}
-        <div className="flex items-center gap-3 md:gap-4">
-          <div className="hidden md:flex items-center gap-3">
+        <div className="flex items-center gap-2 md:gap-3 shrink-0">
+          <div className="hidden md:flex items-center gap-2">
+            
+            {/* زر تغيير اللغة - لابتوب */}
+            <button 
+              onClick={() => switchLanguage(currentLang === 'ar' ? 'en' : 'ar')}
+              className="flex items-center gap-1.5 text-white/70 hover:text-white px-3 py-2 rounded-full font-bold text-xs lg:text-sm border border-white/10 hover:border-white/30 transition-all whitespace-nowrap"
+            >
+              <Globe size={16} className="text-purple-400 shrink-0" />
+              <span>{currentLang === 'ar' ? 'EN' : 'عربي'}</span>
+            </button>
+
             <button 
               onClick={scrollToFooter}
-              className="text-white/70 hover:text-white px-4 py-2.5 rounded-full font-bold text-sm border border-white/10 hover:border-white/30 transition-all"
+              className="text-white/70 hover:text-white px-3 py-2 rounded-full font-bold text-xs lg:text-sm border border-white/10 hover:border-white/30 transition-all whitespace-nowrap"
             >
               تواصل معنا
             </button>
             <button 
               onClick={() => handleTabClick('store')}
-              className="bg-white text-black px-6 py-2.5 rounded-full font-bold text-sm hover:bg-purple-500 hover:text-white transition-all shadow-md"
+              className="bg-white text-black px-4 lg:px-5 py-2 rounded-full font-bold text-xs lg:text-sm hover:bg-purple-500 hover:text-white transition-all shadow-md whitespace-nowrap"
             >
-              اطلب باقتك الآن
+              اطلب باقتك
             </button>
           </div>
 
-          {/* زر القائمة المنسدلة للجوال */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="lg:hidden relative text-white bg-white/5 p-2.5 rounded-xl border border-white/10 hover:bg-white/10 transition-all focus:outline-none"
+            className="lg:hidden relative text-white bg-white/5 p-2 rounded-xl border border-white/10 hover:bg-white/10 transition-all focus:outline-none shrink-0"
             aria-label="Toggle menu"
           >
-            {mobileMenuOpen ? <X size={22} className="text-purple-400" /> : <Menu size={22} />}
+            {mobileMenuOpen ? <X size={20} className="text-purple-400" /> : <Menu size={20} />}
           </button>
         </div>
       </div>
 
-      {/* قائمة الجوال المنسدلة */}
       {mobileMenuOpen && (
         <div className="lg:hidden absolute top-full left-0 right-0 bg-[#0A0A0B]/95 backdrop-blur-xl border-b border-white/10 p-5 shadow-2xl flex flex-col gap-3 animate-fadeIn">
           {menuItems.map((item) => (
             <button
               key={item.tab}
               onClick={() => handleTabClick(item.tab)}
-              className={`flex items-center gap-3 text-sm font-bold transition-all px-4 py-3 rounded-xl w-full text-right ${
+              className={`flex items-center gap-3 text-sm font-bold transition-all px-4 py-3 rounded-xl w-full ${currentLang === 'en' ? 'text-left' : 'text-right'} ${
                 activeTab === item.tab 
                   ? 'bg-purple-600 text-white' 
                   : 'text-white/80 hover:text-white hover:bg-white/5'
@@ -131,6 +159,14 @@ export default function Header({ activeTab, setActiveTab }: any) {
           ))}
 
           <div className="border-t border-white/10 pt-3 mt-1 flex flex-col gap-2.5">
+            {/* زر تغيير اللغة - جوال */}
+            <button 
+              onClick={() => switchLanguage(currentLang === 'ar' ? 'en' : 'ar')}
+              className="flex items-center justify-center gap-2 text-white/80 hover:text-white text-sm font-bold border border-white/10 py-3 rounded-xl transition-all w-full"
+            >
+              <Globe size={16} className="text-purple-400" /> {currentLang === 'ar' ? 'English' : 'العربية'}
+            </button>
+
             <button 
               onClick={scrollToFooter}
               className="flex items-center justify-center gap-2 text-white/80 hover:text-white text-sm font-bold border border-white/10 py-3 rounded-xl transition-all w-full"

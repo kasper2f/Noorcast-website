@@ -6,7 +6,7 @@ export default function Partners() {
     <section className="bg-[#050505] text-white py-24 px-6 border-t border-white/5 w-full">
       <div className="max-w-7xl mx-auto w-full">
         <div className="text-center mb-16 space-y-4">
-          <h2 className="text-3xl md:text-4xl font-black">شركاء النجاح والمسيرة الرقمية</h2>
+          <h2 className="text-3xl md:text-4xl font-black">عملاء وثقو بنا</h2>
           <p className="text-amber-500 font-medium text-sm md:text-base">
             نعمل جنباً إلى جنب مع كبرى العلامات التجارية لتحقيق رؤية استثنائية
           </p>
