@@ -22,27 +22,27 @@ export default function ChatWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isOpen]);
 
-  // =============== الدالة التي تم تعديلها ===============
+  // =============== الدالة التي تم تحديثها ===============
   const handleSend = () => {
     if (!message.trim()) return;
 
-    const textToSend = message; // حفظ النص قبل تفريغ المربع
+    const textToSend = message; 
     
-    // 1. إرسال الرسالة إلى Firebase (نظامك الأساسي - لم نغيره)
+    // 1. إرسال الرسالة إلى Firebase (نظامك الأساسي)
     sendMessage(chatId, textToSend, 'user');
     setMessage('');
 
-    // 2. إرسال إشعار صامت إلى الإيميل عبر Google Apps Script
+    // 2. إرسال إشعار صامت عبر جوجل سكريبت مع تضمين معرف المحادثة
     try {
-      // ⚠️ مهم جداً: ضع الرابط الخاص بك هنا بين علامتي التنصيص
       const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzlL0sfoWhBFXXoLd9ZiPu6boq9WvLlalu4_kf6DkXMdQtmf-XMM32Hxrq0TzFPga3K/exec"; 
       
       fetch(APP_SCRIPT_URL, {
         method: "POST",
         body: JSON.stringify({
           action: 'contact',
+          chatId: chatId, // 👈 أضفنا معرف المحادثة هنا للتحقق من الرسالة الأولى
           name: `زائر من الشات المباشر`, 
-          email: `محادثة رقم: ${chatId.substring(0, 6)}`, // إرسال جزء من الآي دي لتمييز المحادثة
+          email: `محادثة رقم: ${chatId.substring(0, 6)}`, 
           phone: "غير محدد",
           message: textToSend
         })
@@ -52,7 +52,7 @@ export default function ChatWidget() {
       console.error("حدث خطأ في إرسال الإشعار:", error);
     }
   };
-  // ======================================================
+  // ====================================================
 
   const handleServiceClick = (text: string) => {
     const serviceId = text.replace('noorcast://service/', '');
