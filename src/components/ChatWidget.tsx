@@ -22,11 +22,37 @@ export default function ChatWidget() {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages, isOpen]);
 
+  // =============== الدالة التي تم تعديلها ===============
   const handleSend = () => {
     if (!message.trim()) return;
-    sendMessage(chatId, message, 'user');
+
+    const textToSend = message; // حفظ النص قبل تفريغ المربع
+    
+    // 1. إرسال الرسالة إلى Firebase (نظامك الأساسي - لم نغيره)
+    sendMessage(chatId, textToSend, 'user');
     setMessage('');
+
+    // 2. إرسال إشعار صامت إلى الإيميل عبر Google Apps Script
+    try {
+      // ⚠️ مهم جداً: ضع الرابط الخاص بك هنا بين علامتي التنصيص
+      const APP_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzlL0sfoWhBFXXoLd9ZiPu6boq9WvLlalu4_kf6DkXMdQtmf-XMM32Hxrq0TzFPga3K/exec"; 
+      
+      fetch(APP_SCRIPT_URL, {
+        method: "POST",
+        body: JSON.stringify({
+          action: 'contact',
+          name: `زائر من الشات المباشر`, 
+          email: `محادثة رقم: ${chatId.substring(0, 6)}`, // إرسال جزء من الآي دي لتمييز المحادثة
+          phone: "غير محدد",
+          message: textToSend
+        })
+      }).catch(err => console.log("خطأ صامت في الإشعار:", err));
+      
+    } catch (error) {
+      console.error("حدث خطأ في إرسال الإشعار:", error);
+    }
   };
+  // ======================================================
 
   const handleServiceClick = (text: string) => {
     const serviceId = text.replace('noorcast://service/', '');
