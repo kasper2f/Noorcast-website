@@ -84,6 +84,7 @@ export default function App() {
         setDefaultStoreTab('packages');
       }
       if (tab !== 'store') {
+        // هذه هي الدالة التي كانت تمسح الفلتر
         setPreselectedCategory(undefined);
         setSourceProject(null);
         setPendingServiceId(null);
@@ -93,7 +94,6 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // 💡 التعديل تم هنا في هذه الدالة لدعم "الباقات الجاهزة"
   const handleOrderSimilar = (project: any) => {
     const projectSource = project.sourceProject || {
         title: project.title,
@@ -105,15 +105,14 @@ export default function App() {
     const categoryName = project.subCategory || project.category || '';
     const packageCategoriesList = ['إدارة المحتوى', 'المتاجر الإلكترونية', 'المواقع الإلكترونية', 'الهوية البصرية', 'التصوير الشهري'];
     
-    // فحص ذكي: إذا كان الـ subCategory في الشيت هو "الباقات الجاهزة" أو مساوي لاسم باقة
     if (categoryName === 'الباقات الجاهزة' || packageCategoriesList.includes(categoryName)) {
-      setPreselectedCategory(categoryName === 'الباقات الجاهزة' ? undefined : categoryName); // تنظيف إذا كان عام
-      setDefaultStoreTab('packages'); // فتح تبويب الباقات إجبارياً
+      setPreselectedCategory(categoryName === 'الباقات الجاهزة' ? undefined : categoryName); 
+      setDefaultStoreTab('packages'); 
       setPendingServiceId(null);
     } else {
       setPreselectedCategory(categoryName);
-      setDefaultStoreTab('services'); // فتح تبويب الخدمات
-      setPendingServiceId(categoryName); // تمريره للنزول للخدمة
+      setDefaultStoreTab('services'); 
+      setPendingServiceId(categoryName); 
     }
 
     changeTabAndRoute('store');
@@ -132,19 +131,20 @@ export default function App() {
     changeTabAndRoute('store');
   };
 
+  // 💡 التعديل تم هنا: فصلنا التنقل عن دالة changeTabAndRoute لكي لا يُمسح الفلتر
   const handleViewSimilarPortfolio = (category: string) => {
     const cleanCategory = (category || '').trim().toLowerCase();
     const magazineKeywords = ['صور', 'تصوير', 'فوتو', 'جرافيك', 'هوية', 'تصميم', 'إيف ستايل', 'لايف ستايل', 'منتجات'];
     const isMagazineTarget = magazineKeywords.some(keyword => cleanCategory.includes(keyword));
 
+    // نحفظ الفلتر (مثلاً: إدارة المحتوى)
     setPreselectedCategory(category);
     
-    if (isMagazineTarget) {
-      changeTabAndRoute('magazine');
-    } else {
-      changeTabAndRoute('portfolio');
-    }
-
+    // نغير التبويب والمسار يدوياً بدون مسح الفلتر
+    const targetTab = isMagazineTarget ? 'magazine' : 'portfolio';
+    setActiveTab(targetTab);
+    window.location.hash = targetTab;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
     setSelectedProject(null);
   };
 
