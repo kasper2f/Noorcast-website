@@ -35,8 +35,8 @@ export default function ProjectDetailsPage({ project, onBack, onOrderSimilar, on
     ? project.mediaUrl.split(',').slice(1).map((u: string) => u.trim())
     : [];
 
-  // إعدادات نعومة الحركة الموحدة (Spring Transition)
-  const springTransition = { type: "spring", damping: 25, stiffness: 300 };
+  // 💡 الحل هنا: أضفنا "as const" لكي يفهم TypeScript أنها قيمة ثابتة مقبولة
+  const springTransition = { type: "spring" as const, damping: 25, stiffness: 300 };
 
   return (
     <>
@@ -196,12 +196,11 @@ export default function ProjectDetailsPage({ project, onBack, onOrderSimilar, on
         </div>
       </div>
 
-      {/* 💡 شاشة العرض المكبرة المُحسّنة (مفصولة الطبقات لمنع القليتش) */}
+      {/* شاشة العرض المكبرة المُحسّنة */}
       <AnimatePresence>
         {selectedImage && (
           <div className="fixed inset-0 z-[100] flex items-center justify-center p-4">
             
-            {/* الخلفية السوداء (تتلاشى لوحدها بدون تأثير على الصورة) */}
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -211,7 +210,6 @@ export default function ProjectDetailsPage({ project, onBack, onOrderSimilar, on
               onClick={() => setSelectedImage(null)}
             />
             
-            {/* زر الإغلاق */}
             <motion.button 
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -222,7 +220,6 @@ export default function ProjectDetailsPage({ project, onBack, onOrderSimilar, on
               <X size={24} />
             </motion.button>
 
-            {/* الصورة المنبثقة (تطير وتعود بحرية تامة) */}
             <motion.img
               layoutId={selectedImage}
               transition={springTransition}
