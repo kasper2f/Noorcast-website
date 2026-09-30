@@ -26,14 +26,12 @@ export default function App() {
   
   const [pendingServiceId, setPendingServiceId] = useState<string | null>(null);
 
-  // التحميل المسبق الصامت (Pre-fetching) للبيانات في الخلفية فور فتح الموقع لتوفير سرعة فائقة
   useEffect(() => {
     getServices().catch(() => {});
     getPortfolio().catch(() => {});
-    getMagazine().catch(() => {}); // تم إضافة جلب المجلة مسبقاً لتكون فورية
+    getMagazine().catch(() => {}); 
   }, []);
 
-  // دعم الروابط المباشرة عبر الـ Hash
   useEffect(() => {
     const handleHashRoute = () => {
       const hash = window.location.hash;
@@ -67,12 +65,10 @@ export default function App() {
     return () => window.removeEventListener('hashchange', handleHashRoute);
   }, []);
 
-  // التمرير التلقائي لأعلى الصفحة فوراً عند تغيير أي تبويب أو مشروع
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   }, [activeTab, selectedProject]);
 
-  // دالة لتغيير التبويب وتحديث مسار الـ Hash في المتصفح
   const changeTabAndRoute = (tab: string) => {
     setSelectedProject(null);
     if (tab === 'store-services') {
@@ -97,6 +93,7 @@ export default function App() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
+  // 💡 التعديل تم هنا في هذه الدالة لدعم "الباقات الجاهزة"
   const handleOrderSimilar = (project: any) => {
     const projectSource = project.sourceProject || {
         title: project.title,
@@ -108,12 +105,15 @@ export default function App() {
     const categoryName = project.subCategory || project.category || '';
     const packageCategoriesList = ['إدارة المحتوى', 'المتاجر الإلكترونية', 'المواقع الإلكترونية', 'الهوية البصرية', 'التصوير الشهري'];
     
-    if (packageCategoriesList.includes(categoryName)) {
-      setPreselectedCategory(categoryName);
-      setDefaultStoreTab('packages');
+    // فحص ذكي: إذا كان الـ subCategory في الشيت هو "الباقات الجاهزة" أو مساوي لاسم باقة
+    if (categoryName === 'الباقات الجاهزة' || packageCategoriesList.includes(categoryName)) {
+      setPreselectedCategory(categoryName === 'الباقات الجاهزة' ? undefined : categoryName); // تنظيف إذا كان عام
+      setDefaultStoreTab('packages'); // فتح تبويب الباقات إجبارياً
+      setPendingServiceId(null);
     } else {
       setPreselectedCategory(categoryName);
-      setDefaultStoreTab('services');
+      setDefaultStoreTab('services'); // فتح تبويب الخدمات
+      setPendingServiceId(categoryName); // تمريره للنزول للخدمة
     }
 
     changeTabAndRoute('store');
