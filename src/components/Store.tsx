@@ -26,7 +26,6 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
   const [isLoading, setIsLoading] = useState(true);
   const [isMobileCartOpen, setIsMobileCartOpen] = useState(false);
   
-  // حالة تتبع التركيز على مربع البحث لتمدده بشكل ديناميكي
   const [isSearchFocused, setIsSearchFocused] = useState(false);
   
   const [selectedAddons, setSelectedAddons] = useState<Record<string, Record<string, number>>>({});
@@ -116,10 +115,17 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
     }
   }, [targetServiceId, isLoading, ourServices, onClearTarget]);
 
-  const handleViewMagazine = (serviceItem: any) => {
+  // 💡 التعديل هنا: الدالة الآن تقبل إما اسم قسم مباشر (نص) أو كائن (Object)
+  const handleViewMagazine = (itemOrCategory: any) => {
     if (onOrderSimilar) {
-      const targetQuery = serviceItem.subCategory || serviceItem.title;
-      onOrderSimilar(targetQuery);
+      if (typeof itemOrCategory === 'string') {
+        // إذا كان الممرر نصاً مباشراً (مثل "إدارة المحتوى")
+        onOrderSimilar(itemOrCategory);
+      } else {
+        // إذا كان الممرر كائناً من قائمة الخدمات
+        const targetQuery = itemOrCategory.subCategory || itemOrCategory.title;
+        onOrderSimilar(targetQuery);
+      }
     }
   };
 
@@ -217,7 +223,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
 
       {activeTabStore === 'services' && (
         <div className="flex flex-col md:flex-row gap-4 mb-8 md:mb-12 items-start md:items-center">
-          {/* مربع البحث التفاعلي - يتمدد عند الضغط عليه */}
+          {/* مربع البحث التفاعلي */}
           <div className={`relative transition-all duration-500 ease-in-out shrink-0 ${isSearchFocused ? 'w-full md:w-1/2' : 'w-full md:w-64'}`}>
             <Search className={`absolute right-3 top-3.5 transition-colors duration-300 ${isSearchFocused ? 'text-amber-500' : 'text-white/30'}`} size={18} />
             <input 
@@ -230,7 +236,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
             />
           </div>
           
-          {/* شريط الفلاتر القابل للسحب أفقياً بشريط تمرير مخصص */}
+          {/* شريط الفلاتر */}
           <div className="flex-1 w-full overflow-hidden">
             <div className="flex gap-2 overflow-x-auto pb-3 flex-nowrap scroll-smooth [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-[#121212] [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-amber-500/30 hover:[&::-webkit-scrollbar-thumb]:bg-amber-500 [&::-webkit-scrollbar-thumb]:rounded-full transition-all">
               {categories.map((cat: any) => (
@@ -265,7 +271,10 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
                   <div className="space-y-2.5">
                     <button onClick={() => openBooking(pkg)} className="w-full bg-white text-black py-3 rounded-xl font-bold text-xs md:text-sm hover:bg-amber-500 transition-all">حجز الباقة فوراً</button>
                     {currentCatName && (
-                      <button onClick={() => handleViewMagazine({ title: currentCatName })} className="w-full bg-white/5 text-amber-500 py-2.5 rounded-xl font-bold hover:bg-white/10 transition-all text-xs flex items-center justify-center gap-1.5 border border-white/5">
+                      <button 
+                        onClick={() => handleViewMagazine(currentCatName)} // 💡 التعديل هنا: إرسال اسم القسم كفلتر
+                        className="w-full bg-white/5 text-amber-500 py-2.5 rounded-xl font-bold hover:bg-white/10 transition-all text-xs flex items-center justify-center gap-1.5 border border-white/5"
+                      >
                         <Eye size={14} /> استعرض أعمال هذا القسم
                       </button>
                     )}
@@ -330,8 +339,8 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
             <h3 className="text-lg md:text-xl font-bold mb-4 text-white">ملخص السلة</h3>
             {ourServices.filter((s: any) => s.count > 0).length === 0 ? (
                 <div className="flex flex-col items-center justify-center py-6 text-center text-white/30">
-                    <Sparkles size={32} className="mb-3 text-amber-500/50" />
-                    <p className="text-xs md:text-sm">سلتك فارغة.. ابدأ الآن في بناء مشروعك الاستثنائي معنا</p>
+                  <Sparkles size={32} className="mb-3 text-amber-500/50" />
+                  <p className="text-xs md:text-sm">سلتك فارغة.. ابدأ الآن في بناء مشروعك الاستثنائي معنا</p>
                 </div>
             ) : (
                 <div className="space-y-3 mb-6 max-h-60 overflow-y-auto">
