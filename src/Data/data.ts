@@ -157,12 +157,17 @@ export const partners: any[] = [
   { id: '2', name: 'Off The Road', logoUrl: 'https://res.cloudinary.com/dfwfh4xzb/image/upload/v1782942529/Screenshot_123_ksly59.png', logoScale: 'scale-100', invert: false },
   { id: '3', name: 'Rose cup cake', logoUrl: 'https://res.cloudinary.com/dfwfh4xzb/image/upload/v1782942529/images_2_fmlemb.png', logoScale: 'scale-135', invert: false },
   { id: '4', name: 'Celie Cafe', logoUrl: 'https://res.cloudinary.com/dfwfh4xzb/image/upload/v1782942529/transparent-Photoroom_40_ohx8i0.png', logoScale: 'scale-100', invert: false },
-  { id: '5', name: 'Ocean', logoUrl: 'https://res.cloudinary.com/dfwfh4xzb/image/upload/v1782942529/transparent-Photoroom_25_hgw3ib.png', logoScale: 'scale-250', invert: false },
+  { id: '5', name: 'Ocean', logoUrl: 'https://res.cloudinary.com/dfwfh4xzb/image/upload/v1782942529/transparent-Photoroom_25_hgw3ib.png', logoScale: 'scale-260', invert: false },
   { id: '6', name: 'Global Group', logoUrl: 'https://res.cloudinary.com/dfwfh4xzb/image/upload/v1782942529/Screenshot_123_2_zvsed9.png', logoScale: 'scale-130', invert: false },
   { id: '7', name: 'UGO', logoUrl: 'https://res.cloudinary.com/dfwfh4xzb/image/upload/v1782942529/Screenshot_123_1_my3nn2.png', logoScale: 'scale-100', invert: true },
-  { id: '8', name: 'STC Pay', logoUrl: 'https://res.cloudinary.com/dfwfh4xzb/image/upload/v1782942529/images_2_1_ekfqfq.png', logoScale: 'scale-150', invert: false }
+  { id: '8', name: 'STC Pay', logoUrl: 'https://res.cloudinary.com/dfwfh4xzb/image/upload/v1782942529/images_2_1_ekfqfq.png', logoScale: 'scale-150', invert: false },
+  
+  // --- الشركاء الجدد ---
+  { id: '9', name: 'Ministry of Justice', logoUrl: 'https://res.cloudinary.com/dfwfh4xzb/image/upload/v1790755938/aladal_568991462_mtmfnt.png', logoScale: 'scale-140', invert: false },
+  { id: '10', name: 'Aramco', logoUrl: 'https://res.cloudinary.com/dfwfh4xzb/image/upload/v1790756685/images_12_mvffwn.png', logoScale: 'scale-170', invert: false },
+  { id: '11', name: 'Samnan', logoUrl: 'https://res.cloudinary.com/dfwfh4xzb/image/upload/v1790756645/images_11_qqmlw5.png', logoScale: 'scale-140', invert: false },
+  { id: '12', name: 'Homzmart', logoUrl: 'https://res.cloudinary.com/dfwfh4xzb/image/upload/v1790755937/%D9%83%D9%88%D8%AF-%D8%AE%D8%B5%D9%85-homzmart_jgjk1c.png', logoScale: 'scale-130', invert: false }
 ];
-
 export const heroVideos: string[] = [
   'https://youtu.be/WwgWLo6XKxM',
   'https://youtu.be/Jh4Ox5FlP2E',

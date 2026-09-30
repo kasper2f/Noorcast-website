@@ -21,13 +21,13 @@ export default function Loader({ text = 'جاري التحميل...' }: LoaderPr
         }}
         className="relative w-20 h-20 md:w-24 md:h-24 flex items-center justify-center mb-4"
       >
-        {/* خلفية مضيئة متوهجة خلف الشعار */}
-        <div className="absolute inset-0 bg-purple-600/20 rounded-full blur-xl animate-pulse"></div>
+        {/* خلفية مضيئة متوهجة باللون الذهبي/البرتقالي خلف الشعار */}
+        <div className="absolute inset-0 bg-[#e18d33]/25 rounded-full blur-xl animate-pulse"></div>
 
         <img
-          src="https://res.cloudinary.com/dfwfh4xzb/image/upload/v1782727817/WhatsApp_Image_2026-06-21_at_12.56.07_AM_dhzswc.png"
+          src="https://res.cloudinary.com/dfwfh4xzb/image/upload/v1790748099/%D8%AC%D8%AF%D9%8A%D8%AF_%D8%B1%D8%A7%D8%B3%D9%8A%D8%A8%D8%A8%D8%A8%D8%A8%D8%A8%D8%A8%D8%A8%D8%A8%D8%A8_sgl9zv.png"
           alt="NoorCast Loader"
-          className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_15px_rgba(168,85,247,0.6)]"
+          className="w-full h-full object-contain relative z-10 drop-shadow-[0_0_15px_rgba(225,141,51,0.7)]"
         />
       </motion.div>
 
@@ -36,7 +36,7 @@ export default function Loader({ text = 'جاري التحميل...' }: LoaderPr
         initial={{ opacity: 0.5 }}
         animate={{ opacity: [0.4, 1, 0.4] }}
         transition={{ duration: 1.5, repeat: Infinity, ease: 'easeInOut' }}
-        className="text-white/70 text-xs md:text-sm font-bold tracking-wider text-center"
+        className="text-[#e18d33]/80 text-xs md:text-sm font-bold tracking-wider text-center"
       >
         {text}
       </motion.p>

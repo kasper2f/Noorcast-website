@@ -17,7 +17,7 @@ export default function Footer({ setActiveTab }: any) {
   };
 
   return (
-    <footer className="bg-[#050505] border-t border-amber-500/10 pt-14 md:pt-20 pb-8 md:pb-10 px-4 md:px-6">
+    <footer className="bg-[#050505] border-t border-[#e18d33]/20 pt-14 md:pt-20 pb-8 md:pb-10 px-4 md:px-6">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-10 md:gap-16">
         
         {/* العمود الأول: نبذة عن نوركاست */}
@@ -25,7 +25,7 @@ export default function Footer({ setActiveTab }: any) {
           <div className="flex items-center gap-3">
             <div className="w-12 h-12 shrink-0 flex items-center justify-center">
               <img 
-                src="https://res.cloudinary.com/dfwfh4xzb/image/upload/v1782727817/WhatsApp_Image_2026-06-21_at_12.56.07_AM_dhzswc.png" 
+                src="https://res.cloudinary.com/dfwfh4xzb/image/upload/v1790748099/%D8%AC%D8%AF%D9%8A%D8%AF_%D8%B1%D8%A7%D8%B3%D9%8A%D8%A8%D8%A8%D8%A8%D8%A8%D8%A8%D8%A8%D8%A8%D8%A8%D8%A8_sgl9zv.png" 
                 alt="Noorcast Logo" 
                 className="w-full h-full object-contain"
               />
@@ -33,7 +33,7 @@ export default function Footer({ setActiveTab }: any) {
             <h3 className="text-lg md:text-xl font-black text-white tracking-wide">نوركاست</h3>
           </div>
           <p className="text-white/50 text-xs md:text-sm leading-relaxed max-w-xs">
-نوركاست شركة إبداعية سعودية تقدم حلولًا متكاملة في صناعة المحتوى والإنتاج المرئي والتصوير وإدارة منصات التواصل الاجتماعي والتصميم وحلول الذكاء الاصطناعي للعلامات التجارية والأفراد.          </p>
+            نوركاست شركة إبداعية سعودية تقدم حلولًا متكاملة في صناعة المحتوى والإنتاج المرئي والتصوير وإدارة منصات التواصل الاجتماعي والتصميم وحلول الذكاء الاصطناعي للعلامات التجارية والأفراد.          </p>
           <div className="flex gap-3">
             <a href="https://wa.me/966541550160" target="_blank" rel="noopener noreferrer" className="flex items-center justify-center w-8 h-8 rounded-full bg-white/5 hover:bg-emerald-500 hover:text-black cursor-pointer transition-all duration-300 text-white/40">
               <FaWhatsapp size={16} />
@@ -55,9 +55,9 @@ export default function Footer({ setActiveTab }: any) {
               <li key={link.tab}>
                 <button 
                   onClick={() => handleLinkClick(link.tab)}
-                  className="text-white/50 hover:text-purple-400 transition-colors text-xs md:text-sm flex items-center group text-right py-2 cursor-pointer w-full bg-transparent border-0 outline-none"
+                  className="text-white/50 hover:text-[#e18d33] transition-colors text-xs md:text-sm flex items-center group text-right py-2 cursor-pointer w-full bg-transparent border-0 outline-none"
                 >
-                  <span className="w-1 h-1 rounded-full bg-purple-500 mr-2 group-hover:scale-150 transition-transform shrink-0" />
+                  <span className="w-1 h-1 rounded-full bg-[#e18d33] mr-2 group-hover:scale-150 transition-transform shrink-0" />
                   {link.name}
                 </button>
               </li>
@@ -69,16 +69,16 @@ export default function Footer({ setActiveTab }: any) {
         <div className="space-y-4 md:space-y-6">
           <h4 className="font-bold text-base md:text-lg text-white">معلومات الاتصال</h4>
           <div className="space-y-3 md:space-y-4 text-xs md:text-sm text-white/50">
-            <div className="flex items-center gap-3 hover:text-purple-400 transition-colors cursor-pointer">
-              <MapPin size={16} className="text-purple-500 shrink-0" />
+            <div className="flex items-center gap-3 hover:text-[#e18d33] transition-colors cursor-pointer">
+              <MapPin size={16} className="text-[#e18d33] shrink-0" />
               <span>الرياض، المملكة العربية السعودية</span>
             </div>
-            <a href="mailto:info@noorcast.com" className="flex items-center gap-3 hover:text-purple-400 transition-colors cursor-pointer block">
-              <Mail size={16} className="text-purple-500 shrink-0" />
+            <a href="mailto:info@noorcast.com" className="flex items-center gap-3 hover:text-[#e18d33] transition-colors cursor-pointer block">
+              <Mail size={16} className="text-[#e18d33] shrink-0" />
               <span>info@noorcast.com</span>
             </a>
-            <a href="tel:+966541550160" className="flex items-center gap-3 hover:text-purple-400 transition-colors cursor-pointer block">
-              <Phone size={16} className="text-purple-500 shrink-0" />
+            <a href="tel:+966541550160" className="flex items-center gap-3 hover:text-[#e18d33] transition-colors cursor-pointer block">
+              <Phone size={16} className="text-[#e18d33] shrink-0" />
               <span dir="ltr">+966 54 155 0160</span>
             </a>
           </div>
@@ -88,11 +88,11 @@ export default function Footer({ setActiveTab }: any) {
       {/* القسم السفلي المستقل للسجل والضريبي */}
       <div className="max-w-7xl mx-auto mt-10 md:mt-16 pt-8 border-t border-white/10 flex flex-col md:flex-row justify-center items-center gap-6 md:gap-12 text-[11px] md:text-xs text-white/40">
         <div className="flex items-center gap-2">
-            <FileText size={16} className="text-amber-500" />
+            <FileText size={16} className="text-[#e18d33]" />
             <span>سجل تجاري: <strong className="font-mono text-white/70">1010439957</strong></span>
         </div>
         <div className="flex items-center gap-2">
-            <Receipt size={16} className="text-amber-500" />
+            <Receipt size={16} className="text-[#e18d33]" />
             <span>الرقم الضريبي: <strong className="font-mono text-white/70">314356943800003</strong></span>
         </div>
       </div>
