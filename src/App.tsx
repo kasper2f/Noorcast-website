@@ -34,11 +34,22 @@ export default function App() {
 
   useEffect(() => {
     const handleHashRoute = () => {
-      const hash = window.location.hash;
+      // 💡 التحديث هنا: فك تشفير الرابط لدعم اللغة العربية
+      const hash = decodeURIComponent(window.location.hash);
       
       if (hash.startsWith('#service-')) {
         const id = hash.replace('#service-', '');
         setPendingServiceId(id);
+        setDefaultStoreTab('services');
+        setActiveTab('store');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+
+      // 💡 التحديث هنا: دعم رابط الفلتر المباشر
+      if (hash.startsWith('#store-filter-')) {
+        const categoryName = hash.replace('#store-filter-', '').trim();
+        setPreselectedCategory(categoryName);
         setDefaultStoreTab('services');
         setActiveTab('store');
         window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -52,6 +63,8 @@ export default function App() {
         if (cleanHash === 'store-services') {
           setActiveTab('store');
           setDefaultStoreTab('services');
+          // أبقينا هذا السطر كما كان في كودك
+          setPreselectedCategory(undefined);
         } else {
           setActiveTab(cleanHash);
           if (cleanHash === 'store') setDefaultStoreTab('packages');
@@ -84,7 +97,7 @@ export default function App() {
         setDefaultStoreTab('packages');
       }
       if (tab !== 'store') {
-        // هذه هي الدالة التي كانت تمسح الفلتر
+        // هذه هي الدالة التي كانت تمسح الفلتر كما طلبت الحفاظ عليها
         setPreselectedCategory(undefined);
         setSourceProject(null);
         setPendingServiceId(null);
@@ -131,7 +144,7 @@ export default function App() {
     changeTabAndRoute('store');
   };
 
-  // 💡 التعديل تم هنا: فصلنا التنقل عن دالة changeTabAndRoute لكي لا يُمسح الفلتر
+  // 💡 هذه الدالة المحدثة سابقاً التي تفصل التنقل عن مسح الفلتر
   const handleViewSimilarPortfolio = (category: string) => {
     const cleanCategory = (category || '').trim().toLowerCase();
     const magazineKeywords = ['صور', 'تصوير', 'فوتو', 'جرافيك', 'هوية', 'تصميم', 'إيف ستايل', 'لايف ستايل', 'منتجات'];
