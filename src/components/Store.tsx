@@ -37,8 +37,9 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [ourServices, setOurServices] = useState<any[]>([]);
 
+  // 💡 التحديث الأول مدمج هنا: التمييز بين הפلتر والبحث (يحافظ على كودك كما هو)
   useEffect(() => {
-    if (preselectedCategory) {
+    if (preselectedCategory && ourServices.length > 0) {
       if (packageCategoryNames.includes(preselectedCategory)) {
         setActiveTabStore('packages');
         const matchedCat = packageCategories.find((c: any) => c.name === preselectedCategory);
@@ -47,11 +48,20 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
         }
       } else {
         setActiveTabStore('services');
-        setSearchQuery(preselectedCategory); 
-        setSelectedCategory('الكل'); 
+        
+        // فحص ما إذا كانت الكلمة الممررة هي اسم فلتر موجود
+        const isCategoryExist = ourServices.some((s: any) => s.category?.trim() === preselectedCategory.trim());
+        
+        if (isCategoryExist) {
+          setSelectedCategory(preselectedCategory.trim()); // تفعيل كفلتر
+          setSearchQuery(''); // إفراغ البحث
+        } else {
+          setSearchQuery(preselectedCategory); // وضعها في البحث
+          setSelectedCategory('الكل'); 
+        }
       }
     }
-  }, [preselectedCategory]);
+  }, [preselectedCategory, ourServices]);
 
   useEffect(() => {
     const loadServices = async () => {
@@ -115,14 +125,12 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
     }
   }, [targetServiceId, isLoading, ourServices, onClearTarget]);
 
-  // 💡 التعديل هنا: الدالة الآن تقبل إما اسم قسم مباشر (نص) أو كائن (Object)
+  // 💡 التحديث الثاني مدمج هنا: الدالة تقبل كائن أو نص
   const handleViewMagazine = (itemOrCategory: any) => {
     if (onOrderSimilar) {
       if (typeof itemOrCategory === 'string') {
-        // إذا كان الممرر نصاً مباشراً (مثل "إدارة المحتوى")
         onOrderSimilar(itemOrCategory);
       } else {
-        // إذا كان الممرر كائناً من قائمة الخدمات
         const targetQuery = itemOrCategory.subCategory || itemOrCategory.title;
         onOrderSimilar(targetQuery);
       }
@@ -223,7 +231,6 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
 
       {activeTabStore === 'services' && (
         <div className="flex flex-col md:flex-row gap-4 mb-8 md:mb-12 items-start md:items-center">
-          {/* مربع البحث التفاعلي */}
           <div className={`relative transition-all duration-500 ease-in-out shrink-0 ${isSearchFocused ? 'w-full md:w-1/2' : 'w-full md:w-64'}`}>
             <Search className={`absolute right-3 top-3.5 transition-colors duration-300 ${isSearchFocused ? 'text-amber-500' : 'text-white/30'}`} size={18} />
             <input 
@@ -236,7 +243,6 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
             />
           </div>
           
-          {/* شريط الفلاتر */}
           <div className="flex-1 w-full overflow-hidden">
             <div className="flex gap-2 overflow-x-auto pb-3 flex-nowrap scroll-smooth [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-track]:bg-[#121212] [&::-webkit-scrollbar-track]:rounded-full [&::-webkit-scrollbar-thumb]:bg-amber-500/30 hover:[&::-webkit-scrollbar-thumb]:bg-amber-500 [&::-webkit-scrollbar-thumb]:rounded-full transition-all">
               {categories.map((cat: any) => (
@@ -272,7 +278,7 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
                     <button onClick={() => openBooking(pkg)} className="w-full bg-white text-black py-3 rounded-xl font-bold text-xs md:text-sm hover:bg-amber-500 transition-all">حجز الباقة فوراً</button>
                     {currentCatName && (
                       <button 
-                        onClick={() => handleViewMagazine(currentCatName)} // 💡 التعديل هنا: إرسال اسم القسم كفلتر
+                        onClick={() => handleViewMagazine(currentCatName)} 
                         className="w-full bg-white/5 text-amber-500 py-2.5 rounded-xl font-bold hover:bg-white/10 transition-all text-xs flex items-center justify-center gap-1.5 border border-white/5"
                       >
                         <Eye size={14} /> استعرض أعمال هذا القسم
