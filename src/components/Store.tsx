@@ -37,7 +37,6 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
   const [appliedCoupon, setAppliedCoupon] = useState<any>(null);
   const [ourServices, setOurServices] = useState<any[]>([]);
 
-  // 💡 التحديث الأول مدمج هنا: التمييز بين הפلتر والبحث (يحافظ على كودك كما هو)
   useEffect(() => {
     if (preselectedCategory && ourServices.length > 0) {
       if (packageCategoryNames.includes(preselectedCategory)) {
@@ -49,14 +48,13 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
       } else {
         setActiveTabStore('services');
         
-        // فحص ما إذا كانت الكلمة الممررة هي اسم فلتر موجود
         const isCategoryExist = ourServices.some((s: any) => s.category?.trim() === preselectedCategory.trim());
         
         if (isCategoryExist) {
-          setSelectedCategory(preselectedCategory.trim()); // تفعيل كفلتر
-          setSearchQuery(''); // إفراغ البحث
+          setSelectedCategory(preselectedCategory.trim()); 
+          setSearchQuery(''); 
         } else {
-          setSearchQuery(preselectedCategory); // وضعها في البحث
+          setSearchQuery(preselectedCategory); 
           setSelectedCategory('الكل'); 
         }
       }
@@ -125,7 +123,6 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
     }
   }, [targetServiceId, isLoading, ourServices, onClearTarget]);
 
-  // 💡 التحديث الثاني مدمج هنا: الدالة تقبل كائن أو نص
   const handleViewMagazine = (itemOrCategory: any) => {
     if (onOrderSimilar) {
       if (typeof itemOrCategory === 'string') {
@@ -223,7 +220,19 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
       
       <div className="flex justify-start md:justify-center gap-2 md:gap-4 mb-8 md:mb-16 overflow-x-auto pb-2 scrollbar-none">
         {['packages', 'services'].map((tab) => (
-          <button key={tab} onClick={() => { setActiveTabStore(tab as any); setSearchQuery(''); setSelectedCategory('الكل'); }} className={`px-4 md:px-6 py-2.5 md:py-3 rounded-full text-xs md:text-sm font-bold whitespace-nowrap transition-all ${activeTabStore === tab ? 'bg-amber-500 text-black' : 'bg-[#121212] text-white border border-white/5'}`}>
+          <button 
+            key={tab} 
+            onClick={() => { 
+              setActiveTabStore(tab as any); 
+              setSearchQuery(''); 
+              setSelectedCategory('الكل'); 
+              
+              // 💡 الميزة الجديدة: تحديث الرابط بصمت عند التنقل بين الباقات والخدمات
+              const newHash = tab === 'packages' ? '#store' : '#store-services';
+              window.history.replaceState(null, '', newHash);
+            }} 
+            className={`px-4 md:px-6 py-2.5 md:py-3 rounded-full text-xs md:text-sm font-bold whitespace-nowrap transition-all ${activeTabStore === tab ? 'bg-amber-500 text-black' : 'bg-[#121212] text-white border border-white/5'}`}
+          >
             {tab === 'packages' ? 'الباقات الجاهزة' : 'خدماتنا'}
           </button>
         ))}
@@ -248,7 +257,14 @@ export default function Store({ preselectedCategory, onOrderSuccess, onOrderSimi
               {categories.map((cat: any) => (
                 <button 
                   key={cat} 
-                  onClick={() => { setSelectedCategory(cat); setSearchQuery(''); }} 
+                  onClick={() => { 
+                    setSelectedCategory(cat); 
+                    setSearchQuery(''); 
+                    
+                    // 💡 الميزة الجديدة: تحديث الرابط بصمت عند اختيار أي فلتر
+                    const newHash = cat === 'الكل' ? '#store-services' : `#store-filter-${cat}`;
+                    window.history.replaceState(null, '', newHash);
+                  }} 
                   className={`px-4 py-2.5 rounded-xl text-xs whitespace-nowrap border transition-all ${selectedCategory === cat ? 'bg-amber-500 text-black border-amber-500 shadow-md' : 'bg-[#121212] text-white border-white/5 hover:border-amber-500/50'}`}
                 >
                   {cat}
