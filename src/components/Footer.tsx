@@ -75,7 +75,7 @@ export default function Footer({ setActiveTab }: any) {
             </div>
             <a href="mailto:hello@noorcast.co" className="flex items-center gap-3 hover:text-[#e18d33] transition-colors cursor-pointer block">
               <Mail size={16} className="text-[#e18d33] shrink-0" />
-              <span>info@noorcast.com</span>
+              <span>hello@noorcast.co</span>
             </a>
             <a href="tel:+966541550160" className="flex items-center gap-3 hover:text-[#e18d33] transition-colors cursor-pointer block">
               <Phone size={16} className="text-[#e18d33] shrink-0" />
